@@ -7,8 +7,8 @@ Import aedat version 1 or 2.
 """
 
 import numpy as np
-from FindFirstAndLastTimeStamps import FindFirstAndLastTimeStamps
-from NumEventsByType import NumEventsByType
+from PyAedatTools import FindFirstAndLastTimeStamps
+from PyAedatTools import NumEventsByType
 
 def ImportAedatDataVersion1or2(aedat):
     """
@@ -437,9 +437,9 @@ def ImportAedatDataVersion1or2(aedat):
     aedat['data'] = outputData
 
     # Find first and last time stamps
-    aedat = FindFirstAndLastTimeStamps(aedat)
+    aedat = FindFirstAndLastTimeStamps.FindFirstAndLastTimeStamps(aedat)
 
     # Add NumEvents field for each data type
-    aedat = NumEventsByType(aedat)
+    aedat = NumEventsByType.NumEventsByType(aedat)
 
     return aedat

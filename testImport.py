@@ -22,7 +22,7 @@ aedat['importParams']['filePath'] = "C:/Users/saael/OneDrive/Documents/NIWC/Neur
 # aedat['importParams']['fileFormat'] = 'DAVIS'
 
 # Invoke the function
-aedat = ImportAedat(aedat)
+aedat = ImportAedat.ImportAedat(aedat)
 
 # create data structure to give to eventPlayback module
 polarityData = aedat['data']['polarity']

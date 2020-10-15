@@ -24,8 +24,8 @@ Building large arrays,
 import struct
 import math
 import numpy as np
-import FindFirstAndLastTimeStamps
-import NumEventsByType
+from PyAedatTools import FindFirstAndLastTimeStamps
+from PyAedatTools import NumEventsByType
 
 def ImportAedatDataVersion3(aedat):
 

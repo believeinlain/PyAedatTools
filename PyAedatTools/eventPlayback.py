@@ -2,7 +2,7 @@
 import pygame
 import pygame.gfxdraw as gfx
 
-from clusterFinder import findClusters
+from PyAedatTools import ClusterFinder
 
 # playback event data using pygame
 def playEventData(eventData, caption="Event Data Playback"):
@@ -28,7 +28,7 @@ def playEventData(eventData, caption="Event Data Playback"):
 
     # find clusters from data
     print('Filtering data for clusters')
-    clusters = findClusters(eventData, desired_dt)
+    clusters = ClusterFinder.findClusters(eventData, desired_dt)
     print('Done filtering data for clusters')
 
     # initialize pygame

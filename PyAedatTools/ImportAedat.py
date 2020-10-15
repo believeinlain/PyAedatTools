@@ -6,9 +6,9 @@ ImportAedat
 Code contributions from Bodo Rueckhauser
 """
 
-from ImportAedatHeaders import ImportAedatHeaders
-from ImportAedatDataVersion1or2 import ImportAedatDataVersion1or2
-from ImportAedatDataVersion3 import ImportAedatDataVersion3
+from PyAedatTools import ImportAedatHeaders
+from PyAedatTools import ImportAedatDataVersion1or2
+from PyAedatTools import ImportAedatDataVersion3
 
 def ImportAedat(aedat):
     """
@@ -23,8 +23,8 @@ def ImportAedat(aedat):
 # To handle: missing args; search for file to open - request to user
 
     with open(aedat['importParams']['filePath'], 'rb') as aedat['importParams']['fileHandle']:
-        aedat = ImportAedatHeaders(aedat)
+        aedat = ImportAedatHeaders.ImportAedatHeaders(aedat)
         if aedat['info']['fileFormat'] < 3:
-            return ImportAedatDataVersion1or2(aedat)
+            return ImportAedatDataVersion1or2.ImportAedatDataVersion1or2(aedat)
         else:
-            return ImportAedatDataVersion3(aedat)
+            return ImportAedatDataVersion3.ImportAedatDataVersion3(aedat)
