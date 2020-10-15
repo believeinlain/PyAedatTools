@@ -18,7 +18,7 @@ aedat['importParams']['filePath'] = '/home/project/example3.aedat' # Linux
 # Alternatively, make sure the file is already on the python path.
 sys.path.append('/home/project/')
 
-# Add any restrictions on what to read out. 
+# Add any restrictions on what to read out.
 # This example limits readout to the first 1M events (aedat fileFormat 1 or 2 only):
 aedat['importParams']['endEvent'] = 1e6;
 
@@ -46,4 +46,3 @@ aedat['importParams']['source'] = 'Davis240b';
 
 # Invoke the function
 aedat = ImportAedat(aedat)
-

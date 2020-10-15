@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Takes a dict such as created from ImportAedat and returns the same with the events
-having been squashed or stretched into the new dinmensions given as parameters 
+having been squashed or stretched into the new dinmensions given as parameters
 newX newY
 Polarity events only, to start with
 """
@@ -18,5 +18,5 @@ def Reshape(aedat, newX, newY):
     aedat['data']['polarity']['timeStamp']  = aedat['data']['polarity']['timeStamp'][inLogical]
     aedat['data']['polarity']['numEvents']  = len(aedat['data']['polarity']['x'])
     #reset needs handling
-    
+
     return aedat

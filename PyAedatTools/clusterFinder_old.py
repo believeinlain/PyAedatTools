@@ -40,7 +40,7 @@ def findClusters(eventData, frameTime=30):
         ))
 
     print('Finding clusters for each frame.')
-    
+
     # iterate through frames
     f = 0
     clusters = []
@@ -52,7 +52,7 @@ def findClusters(eventData, frameTime=30):
                 # add a cluster at a random point
                 clusters[f].append(
                     Cluster(
-                        randint(0, xLength), 
+                        randint(0, xLength),
                         randint(0, yLength),
                         []))
             else:
@@ -60,7 +60,7 @@ def findClusters(eventData, frameTime=30):
                 for lfc in range(numClusters):
                     clusters[f].append(
                         Cluster(
-                            lastFrameClusters[lfc].x, 
+                            lastFrameClusters[lfc].x,
                             lastFrameClusters[lfc].y,
                             []))
 
@@ -75,7 +75,7 @@ def findClusters(eventData, frameTime=30):
             # remove event if it's dead
             if t >= currentEvent.lifeEnd:
                 events.remove(currentEvent)
-            
+
             # find the cluster closest to this event
             nearestCluster = clusters[f][0]
             nearestClusterDistSquared = \
@@ -100,9 +100,9 @@ def findClusters(eventData, frameTime=30):
                 ySum = ySum + e.y
             c.x = xSum/len(c.eventArray)
             c.y = ySum/len(c.eventArray)
-    
+
         f = f + 1
-    
+
     return clusters
 
 def distSquared(x1, y1, x2, y2):

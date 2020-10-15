@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-This is a sub-function of importAedat. 
-This function processes the headers of an Aedat file. 
-(as well as any attached prefs files). 
+This is a sub-function of importAedat.
+This function processes the headers of an Aedat file.
+(as well as any attached prefs files).
 The .aedat file format is documented here:
 http://inilabs.com/support/software/fileformat/
-    
-2015_12_11 Work in progress: 
-- Reading from a separate prefs file is not implemented yet.  
+
+2015_12_11 Work in progress:
+- Reading from a separate prefs file is not implemented yet.
 - It would be neater (more readable) to turn the xml cell array into a
     structure.
 
@@ -15,21 +15,21 @@ Code contributions from Bodo Rueckhauser
 
 """
 
-from BasicSourceName import BasicSourceName 
+from BasicSourceName import BasicSourceName
 
 def ImportAedatHeaders(aedat):
 
     # Unpack the file handle
     importParams = aedat['importParams']
     fileHandle = importParams['fileHandle']
-    
+
     fileHandle.seek(0)
 
     # From version 3.1 there is an unambiguous division between header and data:
     # A line like this: '#!END-HEADER\r\n'
     # However, for all older files there's no guarantee that the first character
-    # in the data would not be '#'. We ignore this - we look in the next 
-    # unread position and if it is not # we exit. 
+    # in the data would not be '#'. We ignore this - we look in the next
+    # unread position and if it is not # we exit.
 
     info = {};
     info['xml'] = {}
@@ -58,7 +58,7 @@ def ImportAedatHeaders(aedat):
             # final dot
             start_prefix = line.rfind('.')
             if start_prefix == -1:
-                start_prefix = 9    
+                start_prefix = 9
             sourceFromFile = BasicSourceName(line[start_prefix+1:-2]) # Cut off '\r'
         # Version 3.0 encodes it like this
         # The following ignores any trace of previous sources
@@ -70,7 +70,7 @@ def ImportAedatHeaders(aedat):
                 # One source has already been added; convert to a cell array if
                 # it has not already been done
 
-                # NOT HANDLED YET:            
+                # NOT HANDLED YET:
 
                 # if ~iscell(info.sourceFromFile)
                 #    info.sourceFromFile = {info.sourceFromFile};
@@ -98,7 +98,7 @@ def ImportAedatHeaders(aedat):
         cell array, and as the # hierarchy is ascended, the first node is
         popped back up and the nodes # that have been added to the right are
         pushed down inside it.
-        
+
         # If <node> then descend hierarchy - do this by taking the existing
         # cell array and putting it into another cell array
         if strncmp(line, '<node', 5)
@@ -121,7 +121,7 @@ def ImportAedatHeaders(aedat):
         info.xml{end + 1} = {key value};
         end
         # Gets the next line, including line ending chars
-         line = native2unicode(fgets(info.fileHandle)); 
+         line = native2unicode(fgets(info.fileHandle));
         """
         # Read ahead the first character of the next line to complete the
         # while loop
@@ -132,7 +132,7 @@ def ImportAedatHeaders(aedat):
     fileHandle.seek(-1, 1)
     info['beginningOfDataPointer'] = fileHandle.tell()
 
-    
+
     # If a device is specified in input, does it match the derived source?
     if 'source' in importParams:
         sourceFromImportParams = BasicSourceName(importParams['source'])
@@ -151,15 +151,15 @@ def ImportAedatHeaders(aedat):
         try:
             info['source'] = sourceFromFile
         except UnboundLocalError:
-            # If no source was detected, assume it was from a DVS128	
+            # If no source was detected, assume it was from a DVS128
             print('No source detected, assuming Dvs128')
             info['source'] = 'Dvs128'
-        
+
     """
     % Get the address space (dimensions) of the device
     % For vision sensors, this is a tuple [X Y]
     info.deviceAddressSpace = DeviceAddressSpace(info.source);
-    """    
+    """
     aedat['info'] = info
 
     return aedat

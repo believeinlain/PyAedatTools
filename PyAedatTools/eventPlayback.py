@@ -77,12 +77,12 @@ def playEventData(eventData, caption="Event Data Playback"):
 
                     # increment events added
                     i = i + 1
-                
+
                 # draw clusters for current frame
                 if (f < len(clusters)):
                     for c in clusters[f]:
                         pygame.draw.circle(screen, (255,0,0), (int(xLength-c.x), int(yLength-c.y)), 5)
-                
+
                 # update the display
                 pygame.display.update()
 

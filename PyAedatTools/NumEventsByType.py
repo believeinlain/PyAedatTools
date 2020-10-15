@@ -2,7 +2,7 @@ def NumEventsByType(aedat):
 
     '''
     For each data type in aedat['data'], fill in the numEvents field.
-    If there are no events, remove the data type field. 
+    If there are no events, remove the data type field.
     '''
 
     if 'special' in aedat['data']:

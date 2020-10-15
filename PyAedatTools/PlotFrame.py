@@ -6,23 +6,23 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
 # REWRITE HALFWAY THROUGH
 
     '''
-    Takes 'aedat' - a data structure containing an imported .aedat file, 
+    Takes 'aedat' - a data structure containing an imported .aedat file,
     as created by ImportAedat, and creates a series of images from selected
     frames.
     The number of subplots is given by the numPlots parameter.
-    'distributeBy' can either be 'time' or 'events', to decide how the points 
-    around which data is rendered are chosen. 
+    'distributeBy' can either be 'time' or 'events', to decide how the points
+    around which data is rendered are chosen.
     The frame events are then chosen as those nearest to the time points.
-    If the 'distributeBy' is 'time' then if the further parameters 'minTime' 
+    If the 'distributeBy' is 'time' then if the further parameters 'minTime'
     and 'maxTime' are used then the time window used is only between
     those limits.
     '''
-    
+
     try:
     	distributeBy = distributeBy
     except NameError:
         distributeBy = 'time'
-    
+
     # Assume that any aedat3 frame timestamps have been simplified
     	timeStamps = aedat['data']['frame']['timeStampStart']
     numFrames = aedat['data']['frame']['numEvents']
@@ -30,16 +30,16 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
     	numPlots = numFrames
 
     if numFrames == numPlots:
-    	distributeBy = 'events'    
-    
+    	distributeBy = 'events'
+
     # Distribute plots in a raster with a 3:4 ratio
     numPlotsX = round(sqrt(numPlots / 3 * 4))
     numPlotsY = np.ceil(numPlots / numPlotsX)
-    
-    
-!!!!!!!REWRITE GOT TO HERE!    
-    
-    
+
+
+!!!!!!!REWRITE GOT TO HERE!
+
+
     if strcmpi(distributeBy, 'time')
         if ~exist('minTime', 'var') || (exist('minTime', 'var') && minTime == 0)
             minTime = min(timeStamps);
@@ -51,7 +51,7 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
         else
             maxTime = maxTime * 1e6;
         end
-    
+
     	totalTime = maxTime - minTime;
     	timeStep = totalTime / numPlots;
     	timePoints = minTime + timeStep * 0.5 : timeStep : maxTime;
@@ -59,9 +59,9 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
     	framesPerStep = numFrames / numPlots;
     	timePoints = timeStamps(ceil(framesPerStep * 0.5 : framesPerStep : numFrames));
     end
-    
-!!! THIS IS AN EXAMPLE FROM MATPLOTLIB    
-    
+
+!!! THIS IS AN EXAMPLE FROM MATPLOTLIB
+
     f, axarr = plt.subplots(2, 2)
     axarr[0, 0].plot(x, y)
     axarr[0, 0].set_title('Axis [0,0]')
@@ -73,9 +73,9 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
     axarr[1, 1].set_title('Axis [1,1]')
     # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
     plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
-    plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)    
-    
-    
+    plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
+
+
 
 
     for plotCount = 1 : numPlots
@@ -85,7 +85,7 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
     	hold all
     	% Find eventIndex nearest to timePoint
     	frameIndex = find(timeStamps >= timePoints(plotCount), 1, 'first');
-    	% Ignore colour for now ...    
+    	% Ignore colour for now ...
     	if exist('transpose', 'var') && transpose
         	imagesc(input.data.frame.samples{frameIndex}')
         else
@@ -101,4 +101,3 @@ def PlotFrame(aedat, numPlots, distributeBy, minTime, maxTime, flipVertical, fli
     	end
     	title(['Time: ' num2str(round(double(timeStamps(frameIndex)) / 1000) /1000) ' s; frame number: ' num2str(frameIndex)])
     end
-    

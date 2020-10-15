@@ -3,10 +3,10 @@
 # Federico Corradi contributed the first version of this code
 """
 Import data from AEDAT version 3 format
-A subfunction of ImportAedat.py 
+A subfunction of ImportAedat.py
 Refer to this function for the definition of input/output variables etc
 
-Let's just assume this code runs on little-endian processor. 
+Let's just assume this code runs on little-endian processor.
 
 Not handled yet:
 Timestamp overflow
@@ -14,16 +14,16 @@ Reading by packets
 Data-type-specific read in
 Frames and other data types
 Multi-source read-in
-Building large arrays, 
-    exponentially expanding them, and cropping them at the end, in order to 
-    read more efficiently - at the moment we build a list then convert to array. 
+Building large arrays,
+    exponentially expanding them, and cropping them at the end, in order to
+    read more efficiently - at the moment we build a list then convert to array.
 
 
 """
 
 import struct
 import math
-import numpy as np                       
+import numpy as np
 import FindFirstAndLastTimeStamps
 import NumEventsByType
 
@@ -33,48 +33,48 @@ def ImportAedatDataVersion3(aedat):
     info = aedat['info']
     importParams = aedat['importParams']
     fileHandle = importParams['fileHandle']
-    
+
     # Check the startEvent and endEvent parameters
     if 'startPacket' in importParams:
         startPacket = importParams.startPacket
-    else:    
+    else:
         startPacket = 1
 
     if 'endPacket' in importParams:
         endPacket = importParams['endPacket']
     else:
         endPacket = np.inf
-        
+
     if startPacket > endPacket:
         raise Exception('The startPacket parameter is %d, but the endPacket parameter is %d' % (startPacket, endPacket))
-    
+
     if 'startEvent' in importParams:
         raise Exception('The startEvent parameter is set, but range by events is not available for .aedat version 3.x files')
-    
+
     if 'endEvent' in importParams:
         raise Exception('The endEvent parameter is set, but range by events is not available for .aedat version 3.x files')
-    
+
     if 'startTime' in importParams:
         startTime = importParams['startTime']
     else:
         startTime = 0
-    
+
     if 'endTime' in importParams:
         endTime = importParams['endTime']
     else:
         endTime = np.inf
-    
+
     if startTime > endTime:
         raise Exception('The startTime parameter is %d, but the endTime parameter is %d' % (info['startTime'], info['endTime']))
-    
-    # By default, throw away timeStampFrameStart/End, 
+
+    # By default, throw away timeStampFrameStart/End,
     # renaming timeStampExposureStart/End to timeStampStart/End
     if 'simplifyFrameTimeStamps' in importParams:
         simplifyFrameTimeStamps = importParams['simplifyFrameTimeStamps']
     else:
         simplifyFrameTimeStamps = True
 
-    # By default, throw away the valid flags, 
+    # By default, throw away the valid flags,
     # and any events which are set as invalid.
     if 'validOnly' in importParams:
         validOnly = importParams['validOnly']
@@ -86,9 +86,9 @@ def ImportAedatDataVersion3(aedat):
         modPacket = importParams['modPacket']
     else:
         modPacket = 1
-    
+
     # By default, import the full data, rather than just indexing the packets
-    if 'noData' in importParams: 
+    if 'noData' in importParams:
         noData = importParams['noData']
     else:
         noData = False
@@ -99,7 +99,7 @@ def ImportAedatDataVersion3(aedat):
         dataTypes = importParams['dataTypes']
     else:
         allDataTypes = True
-        
+
     packetCount = 0
 
     # Has this file already been indexed in a previous pass?
@@ -115,7 +115,7 @@ def ImportAedatDataVersion3(aedat):
         packetTypes = np.ones(1000, np.uint16)
         packetPointers = np.zeros(1000, np.uint64)
         packetTimeStamps = np.zeros(1000, np.uint64)
-        
+
     if noData == False:
         specialNumEvents = 0
         specialValid = np.zeros(0, dtype=bool)
@@ -145,33 +145,33 @@ def ImportAedatDataVersion3(aedat):
 
         point1DNumEvents = 0
         point1DValid     = np.zeros(0, dtype=bool)
-        point1DDataFormat = np.dtype([('info', '<u4'), 
-                                      ('x', '<f4'), 
+        point1DDataFormat = np.dtype([('info', '<u4'),
+                                      ('x', '<f4'),
                                       ('timeStamp', '<i4')])
 
         point2DNumEvents = 0
         point2DValid     = np.zeros(0, dtype=bool)
-        point2DDataFormat = np.dtype([('info', '<u4'), 
-                                      ('x', '<f4'), 
-                                      ('y', '<f4'), 
+        point2DDataFormat = np.dtype([('info', '<u4'),
+                                      ('x', '<f4'),
+                                      ('y', '<f4'),
                                       ('timeStamp', '<i4')])
 
         point3DNumEvents = 0
         point3DValid     = np.zeros(0, dtype=bool)
-        point3DDataFormat = np.dtype([('info', '<u4'), 
-                                      ('x', '<f4'), 
-                                      ('y', '<f4'), 
-                                      ('z', '<f4'), 
+        point3DDataFormat = np.dtype([('info', '<u4'),
+                                      ('x', '<f4'),
+                                      ('y', '<f4'),
+                                      ('z', '<f4'),
                                       ('timeStamp', '<i4')])
 
-        # Ignore scale for now 
-  
+        # Ignore scale for now
+
     fileHandle.seek(info['beginningOfDataPointer'])
-    
+
     # If the file has been indexed or partially indexed, and there is a
     # startPacket or startTime parameter, then jump ahead to the right place
     if 'packetPointers' in info:
-        if startPacket > 1: 
+        if startPacket > 1:
             fileHandle.seek(packetPointers(startPacket))
             packetCount = startPacket - 1
         elif startTime > 0:
@@ -179,12 +179,12 @@ def ImportAedatDataVersion3(aedat):
             if targetPacketIndices: # i.e. targetPacketIndices is not empty
                 fileHandle.seek(packetPointers(targetPacketIndices[-1]))
                 packetCount = targetPacketIndices[-1]
-    
+
     # If the file has already been indexed (PARTIAL INDEXING NOT HANDLED), and
     # we are using modPacket to skip a proportion of the data, then use this
     # flag to speed up the loop
     modSkipping = 'packetPointers' in info and modPacket > 1
-    
+
     while True : # implement the exit conditions inside the loop - allows to distinguish between different types of exit
     # Headers
         # Read the header of the next packet
@@ -204,7 +204,7 @@ def ImportAedatDataVersion3(aedat):
             packetTypes      = np.append(packetTypes,      np.ones (packetCount, 'uint16') * 32768, 0)
             packetPointers   = np.append(packetPointers,   np.zeros(packetCount, 'uint64'), 0)
             packetTimeStamps = np.append(packetTimeStamps, np.zeros(packetCount, 'uint64'), 0)
-        packetPointers[packetCount] = fileHandle.tell() - 28    
+        packetPointers[packetCount] = fileHandle.tell() - 28
         if packetCount % 100 == 0 :
             print('packet: %d; file position: %d MB' % (packetCount, math.floor(info['fileHandle'].tell / 1000000)))
         if startPacket > packetCount or np.mod(packetCount, modPacket) > 0:
@@ -232,7 +232,7 @@ def ImportAedatDataVersion3(aedat):
             '''
             eventType = struct.unpack('h', header[0:2])[0]
             packetTypes[packetCount] = eventType
-        
+
             #eventSource = struct.unpack('h', [header[2:4])[0] # Multiple sources not handled yet
             if noData:
                 # Inefficient - better to just read the timestamp and skip the rest
@@ -241,9 +241,9 @@ def ImportAedatDataVersion3(aedat):
                                        packetData[eventTsOffset : eventTsOffset + 4])[0]) \
                               + packetTimeStampOffset
             else:
-                              
+
                 # Handle the packet types individually:
-            
+
                 # Special events
                 if eventType == 0:
                     if allDataTypes or 'special' in info['dataTypes']:
@@ -265,14 +265,14 @@ def ImportAedatDataVersion3(aedat):
                             = bool(allInfo and 0x1) # Pick off the first bit
                         specialAddress[specialNumEvents : specialNumEvents + eventNumber] \
                             = (allInfo and 0xFE) >> 1 # Next 7 bits are the special event type
-                        # special optional data would go here - next 24 bits - no need at the present    
+                        # special optional data would go here - next 24 bits - no need at the present
                         specialTimeStamp[specialNumEvents : specialNumEvents + eventNumber] \
                             = packetTimeStampOffset + np.uint64(np.array(allEvents['timeStamp']))
                         mainTimeStamp = specialTimeStamp(specialNumEvents)
                         specialNumEvents = specialNumEvents + eventNumber
 
-                # Polarity events                
-                elif eventType == 1:  
+                # Polarity events
+                elif eventType == 1:
                     if allDataTypes or 'polarity' in info['dataTypes']:
                         # First check if the array is big enough
                         currentLength = len(polarityValid)
@@ -294,7 +294,7 @@ def ImportAedatDataVersion3(aedat):
                         allAddresses = np.array(allEvents['addr'])
                         # Pick off the first bit as the validity mark
                         polarityValid[polarityNumEvents : polarityNumEvents + eventNumber] \
-                            = bool(allAddresses & 0x1) 
+                            = bool(allAddresses & 0x1)
                         # Pick off the second bit as the polarity
                         polarityPolarity[polarityNumEvents : polarityNumEvents + eventNumber] \
                             = bool(allAddresses & 0x2)
@@ -303,12 +303,12 @@ def ImportAedatDataVersion3(aedat):
                         polarityX[polarityNumEvents : polarityNumEvents + eventNumber] \
                             = np.uint16((allAddresses & 0xFFFE0000) >> 17)
                         polarityTimeStamp[polarityNumEvents : polarityNumEvents + eventNumber] \
-                            = packetTimeStampOffset + np.uint64(np.array(allEvents['timeStamp'])) 
+                            = packetTimeStampOffset + np.uint64(np.array(allEvents['timeStamp']))
                         mainTimeStamp = polarityTimeStamp(polarityNumEvents)
                         polarityNumEvents = polarityNumEvents + eventNumber
                 # Frames
-                elif(eventType == 2): 
-                    '''                    
+                elif(eventType == 2):
+                    '''
                     if allDataTypes || any(cellfun(cellFind('frame'), dataTypes))
                         % First check if the array is big enough
                         currentLength = length(frameValid);
@@ -331,7 +331,7 @@ def ImportAedatDataVersion3(aedat):
                             frameXPosition				= uint16(zeros(eventNumber, 1));
                             frameYPosition				= uint16(zeros(eventNumber, 1));
                             frameSamples				= cell(eventNumber, 1);
-                        else	
+                        else
                             while eventNumber > currentLength - frameNumEvents
                                 frameValid					= [frameValid;                  false(currentLength, 1)];
                                 frameColorChannels			= [frameColorChannels;			uint8(zeros(currentLength, 1))];
@@ -342,7 +342,7 @@ def ImportAedatDataVersion3(aedat):
                                     frameTimeStampEnd		= [frameTimeStampEnd;		uint64(zeros(currentLength, 1))];
                                 else
                                     frameTimeStampFrameStart	= [frameTimeStampFrameStart;	uint64(zeros(currentLength, 1))];
-                                    frameTimeStampFrameEnd		= [frameTimeStampFrameEnd;		uint64(zeros(currentLength, 1))];                                
+                                    frameTimeStampFrameEnd		= [frameTimeStampFrameEnd;		uint64(zeros(currentLength, 1))];
                                     frameTimeStampExposureStart = [frameTimeStampExposureStart; uint64(zeros(currentLength, 1))];
                                     frameTimeStampExposureEnd	= [frameTimeStampExposureEnd;	uint64(zeros(currentLength, 1))];
                                 end
@@ -354,7 +354,7 @@ def ImportAedatDataVersion3(aedat):
                                 currentLength = length(frameValid);
                                 %disp(['Frame array resized to ' num2str(currentLength)])
                             end
-                        end					
+                        end
 
                         % Iterate through the events, converting the data and
                         % populating the arrays
@@ -402,16 +402,16 @@ def ImportAedatDataVersion3(aedat):
                             % fundamental 10 bit representation
                             frameSamples{frameNumEvents} = frameSamples{frameNumEvents} / 2^6;
                         end
-                        
+
                     end
                     '''
-                # Imu6    
+                # Imu6
                 elif eventType == 3:
                     '''
                     if allDataTypes || any(cellfun(cellFind('imu6'), dataTypes))
                         % First check if the array is big enough
                         currentLength = length(imu6Valid);
-                        if currentLength == 0 
+                        if currentLength == 0
                             imu6Valid			= np.zeros(eventNumber, dtype=bool)
                             imu6TimeStamp		= uint64(zeros(eventNumber, 1));
                             imu6AccelX			= single(zeros(eventNumber, 1));
@@ -421,7 +421,7 @@ def ImportAedatDataVersion3(aedat):
                             imu6GyroY			= single(zeros(eventNumber, 1));
                             imu6GyroZ			= single(zeros(eventNumber, 1));
                             imu6Temperature     = single(zeros(eventNumber, 1));
-                        else	
+                        else
                             while eventNumber > currentLength - imu6NumEvents
                                 imu6Valid			= [imu6Valid;        false(currentLength, 1)];
                                 imu6TimeStamp		= [imu6TimeStamp;    uint64(zeros(currentLength, 1))];
@@ -431,7 +431,7 @@ def ImportAedatDataVersion3(aedat):
                                 imu6GyroX			= [imu6GyroX;        single(zeros(currentLength, 1))];
                                 imu6GyroY			= [imu6GyroY;        single(zeros(currentLength, 1))];
                                 imu6GyroZ			= [imu6GyroZ;        single(zeros(currentLength, 1))];
-                                imu6Temperature     = [imu6Temperature;  single(zeros(currentLength, 1))];                            
+                                imu6Temperature     = [imu6Temperature;  single(zeros(currentLength, 1))];
                                 currentLength = length(imu6Valid);
                             end
                         end
@@ -486,9 +486,9 @@ def ImportAedatDataVersion3(aedat):
                         earNeuron		= uint8([]);
                         earFilter		= uint8([]);
                         %}
-                    '''        
+                    '''
                 # Point1D
-                elif eventType == 8: 
+                elif eventType == 8:
 
                     if allDataTypes or 'point1D' in info['dataTypes']:
                         # First check if the array is big enough
@@ -498,7 +498,7 @@ def ImportAedatDataVersion3(aedat):
                             point1DTimeStamp = np.zeros(eventNumber, 'uint64')
                             point1DType      = np.zeros(eventNumber, 'uint8')
                             point1DX         = np.zeros(eventNumber, 'float32')
-                        else:	
+                        else:
                             while eventNumber > currentLength - point1DNumEvents:
                                 point1DValid		= np.append(point1DValid,		np.zeros(currentLength, 'bool'  ))
                                 point1DTimeStamp	= np.append(point1DTimeStamp,	np.zeros(currentLength, 'uint64'))
@@ -511,7 +511,7 @@ def ImportAedatDataVersion3(aedat):
                             = bool(allInfo and 0x1) # Pick off the first bit
                         point1DType[point1DNumEvents : point1DNumEvents + eventNumber] \
                             = (allInfo and 0xFE) >> 1 # Next 7 bits are the point1D event type
-                        # point1D scale would go here - next 8 bits - no need at the present    
+                        # point1D scale would go here - next 8 bits - no need at the present
                         point1DX[point1DNumEvents : point1DNumEvents + eventNumber] \
                             = np.array(allEvents['x'])
                         point1DTimeStamp[point1DNumEvents : point1DNumEvents + eventNumber] \
@@ -545,7 +545,7 @@ def ImportAedatDataVersion3(aedat):
                             = np.logical_and(allInfo, 0x1) # Pick off the first bit
                         point2DType[point2DNumEvents : point2DNumEvents + eventNumber] \
                             = (allInfo & 0xFE) >> 1 # Next 7 bits are the point1D event type
-                        # point1D scale would go here - next 8 bits - no need at the present    
+                        # point1D scale would go here - next 8 bits - no need at the present
                         point2DX[point2DNumEvents : point2DNumEvents + eventNumber] \
                             = np.array(allEvents['x'])
                         point2DY[point2DNumEvents : point2DNumEvents + eventNumber] \
@@ -554,7 +554,7 @@ def ImportAedatDataVersion3(aedat):
                             = packetTimeStampOffset + np.uint64(np.array(allEvents['timeStamp']))
                         mainTimeStamp = point2DTimeStamp[point2DNumEvents]
                         point2DNumEvents = point2DNumEvents + eventNumber
-                        
+
                 # Point3D
                 elif eventType == 10:
 
@@ -583,13 +583,13 @@ def ImportAedatDataVersion3(aedat):
                             = np.logical_and(allInfo, 0x1) # Pick off the first bit
                         point3DType[point3DNumEvents : point3DNumEvents + eventNumber] \
                             = (allInfo & 0xFE) >> 1 # Next 7 bits are the point1D event type
-                        # point1D scale would go here - next 8 bits - no need at the present    
+                        # point1D scale would go here - next 8 bits - no need at the present
                         point3DX[point3DNumEvents : point3DNumEvents + eventNumber] \
                             = np.array(allEvents['x'])
                         point3DY[point3DNumEvents : point3DNumEvents + eventNumber] \
                             = np.array(allEvents['y'])
                         point3DZ[point3DNumEvents : point3DNumEvents + eventNumber] \
-                            = np.array(allEvents['z'])                            
+                            = np.array(allEvents['z'])
                         point3DTimeStamp[point3DNumEvents : point3DNumEvents + eventNumber] \
                             = packetTimeStampOffset + np.uint64(np.array(allEvents['timeStamp']))
                         mainTimeStamp = point3DTimeStamp[point3DNumEvents]
@@ -597,27 +597,27 @@ def ImportAedatDataVersion3(aedat):
 
                 else:
                     raise Exception('Unknown event type')
-            
+
             if mainTimeStamp > endTime * 1e6 \
                     and mainTimeStamp != 0x7FFFFFFF: # This may be a timestamp reset - don't let it stop the import
                 # Naively assume that the packets are all ordered correctly and finish
-                break                            
+                break
         if packetCount == endPacket:
             break
-                    
+
 # Clip data arrays to correct size
 
     if not noData:
 
         outputData = {}
-    
+
         if specialNumEvents > 0:
             special = {}
-            special['valid']      = specialValid[0 : specialNumEvents] 
+            special['valid']      = specialValid[0 : specialNumEvents]
             special['timeStamp']  = specialTimeStamp[0 : specialNumEvents]
             special['address']    = specialAddress[0 : specialNumEvents]
             outputData['special'] = special
-    
+
         if polarityNumEvents > 0:
             polarity = {}
             polarity['valid']       = polarityValid[0 : polarityNumEvents]
@@ -626,11 +626,11 @@ def ImportAedatDataVersion3(aedat):
             polarity['x']           = polarityX[0 : polarityNumEvents]
             polarity['polarity']    = polarityPolarity[0 : polarityNumEvents]
             outputData['polarity']  = polarity
-    
+
         '''
         if frameNumEvents > 0
             keepLogical = false(size(frameValid, 1), 1);
-            keepLogical(1:frameNumEvents) = true; 
+            keepLogical(1:frameNumEvents) = true;
             frame.valid = frameValid(keepLogical);
             frame.roiId					= frameRoiId(keepLogical);
             frame.colorChannels			= frameColorChannels(keepLogical);
@@ -651,36 +651,36 @@ def ImportAedatDataVersion3(aedat):
             frame.yPosition				= frameYPosition(keepLogical);
             outputData.frame = frame;
         end
-    
+
         if imu6NumEvents > 0
             keepLogical = false(size(imu6Valid, 1), 1);
-            keepLogical(1:imu6NumEvents) = true; 
-            imu6.valid = imu6Valid(keepLogical); 
+            keepLogical(1:imu6NumEvents) = true;
+            imu6.valid = imu6Valid(keepLogical);
             imu6.timeStamp	= imu6TimeStamp(keepLogical);
             imu6.gyroX		= imu6GyroX(keepLogical);
             imu6.gyroY		= imu6GyroY(keepLogical);
-            imu6.gyroZ		= imu6GyroZ(keepLogical); 
+            imu6.gyroZ		= imu6GyroZ(keepLogical);
             imu6.accelX		= imu6AccelX(keepLogical);
             imu6.accelY		= imu6AccelY(keepLogical);
             imu6.accelZ		= imu6AccelZ(keepLogical);
             imu6.temperature = imu6Temperature(keepLogical);
             outputData.imu6 = imu6;
         end
-    
+
         if sampleNumEvents > 0
             keepLogical = false(size(sampleValid, 1), 1);
-            keepLogical(1:sampleNumEvents) = true; 
-            sample.valid = sampleValid(keepLogical); 
+            keepLogical(1:sampleNumEvents) = true;
+            sample.valid = sampleValid(keepLogical);
             sample.timeStamp	= sampleTimeStamp(keepLogical);
             sample.sampleType	= sampleSampleType(keepLogical);
             sample.sample		= sampleSample(keepLogical);
             outputData.sample = sample;
         end
-    
+
         if earNumEvents > 0
             keepLogical = false(size(earValid, 1), 1);
-            keepLogical(1:earNumEvents) = true; 
-            ear.valid = earValid(keepLogical); 
+            keepLogical(1:earNumEvents) = true;
+            ear.valid = earValid(keepLogical);
             ear.timeStamp	= earTimeStamp(keepLogical);
             ear.position	= earosition(keepLogical);
             ear.channel		= earChannel(keepLogical);
@@ -691,12 +691,12 @@ def ImportAedatDataVersion3(aedat):
         '''
         if point1DNumEvents > 0:
             point1D = {}
-            point1D['valid'] = point1DValid[0 : point1DNumEvents] 
+            point1D['valid'] = point1DValid[0 : point1DNumEvents]
             point1D['timeStamp'] = point1DTimeStamp[0 : point1DNumEvents]
             point1D['type'] = point1DType[0 : point1DNumEvents]
             point1D['x'] = point1DX[0 : point1DNumEvents]
             outputData['point1D'] = point1D
-    
+
         if point2DNumEvents > 0:
             point2D = {}
             point2D['valid'] = point2DValid[0 : point2DNumEvents]
@@ -705,7 +705,7 @@ def ImportAedatDataVersion3(aedat):
             point2D['x'] = point2DX[0 : point2DNumEvents]
             point2D['y'] = point2DY[0 : point2DNumEvents]
             outputData['point2D'] = point2D
-            
+
         if point3DNumEvents > 0:
             point3D = {}
             point3D['valid'] = point3DValid[0 : point3DNumEvents]
@@ -716,16 +716,16 @@ def ImportAedatDataVersion3(aedat):
             point3D['z'] = point3DZ[0 : point3DNumEvents]
             outputData['point3D'] = point3D
 
-    # Pack packet info 
+    # Pack packet info
     info['packetTypes']     = packetTypes[0 : packetCount]
     info['packetPointers']  = packetPointers[0 : packetCount]
     info['packetTimeStamps'] = packetTimeStamps[0 : packetCount]
-    
+
     # Calculate data volume by type
-    
-    # This calculation excludes the final packet for simplicity. 
+
+    # This calculation excludes the final packet for simplicity.
     # It doesn't handle partial imports or invalid data.
-    
+
     ''' LATER
     packetSizes = np.append(info['packetPointers'][1 : ] - info.packetPointers[0 : -1] - 28, 0)
     info['dataVolumeByEventType'] = {};
@@ -736,33 +736,27 @@ def ImportAedatDataVersion3(aedat):
     end
     '''
     # Pack the data into the output structure
-    
+
     aedat['info'] = info
     try:
         aedat['data'] = outputData
     except NameError:
         pass
     # the unpacked importParams should not have been changed
-    
+
     # Remove invalid events
-    
+
     if validOnly and not noData:
     	pass # LATER aedat = RemoveInvalidEvents(aedat)
-    
+
     # Add NumEvents field for each data type
-    
+
     if not noData:
         aedat = NumEventsByType(aedat)
-    
-    # Find first and last time stamps      
-    
+
+    # Find first and last time stamps
+
     if not noData:
         aedat = FindFirstAndLastTimeStamps(aedat)
 
     return aedat
-
-
-
-
-
-

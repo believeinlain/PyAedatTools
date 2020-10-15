@@ -1,15 +1,15 @@
 function PlotPolarity(input, numPlots, distributeBy, minTime, maxTime, proportionOfPixels, contrast, flipVertical, flipHorizontal, transpose)
 
 %{
-Takes 'input' - a data structure containing an imported .aedat file, 
+Takes 'input' - a data structure containing an imported .aedat file,
 as created by ImportAedat, and creates a series of green/red plots of
-polarity data. 
+polarity data.
 The number of subplots is given by the numPlots parameter.
-'distributeBy' can either be 'time' or 'events', to decide how the points 
+'distributeBy' can either be 'time' or 'events', to decide how the points
 around which data is rendered are chosen.
 The events are then recruited by the time points, spreading out until
-either they are about to overlap with a neighbouring point, or until 
-a certain ratio of an array full is reached. 
+either they are about to overlap with a neighbouring point, or until
+a certain ratio of an array full is reached.
 %}
 
 % The proportion of an array-full of events which is shown on a plot
@@ -76,14 +76,14 @@ for plotCount = 1 : numPlots
 	selectedLogical = [false(firstIndex - 1, 1); ...
 					true(lastIndex - firstIndex + 1, 1); ...
 					false(numEvents - lastIndex, 1)];
-	
+
 	% This is how to do a straight plot with contrast of 1, where off (red)
-	% events overwrite on (green) events. 
+	% events overwrite on (green) events.
 	% onLogical = selectedLogical & input.data.polarity.polarity;
 	% offLogical = selectedLogical & ~input.data.polarity.polarity;
 	% plot(input.data.polarity.x(onLogical), input.data.polarity.y(onLogical), '.g');
 	% plot(input.data.polarity.x(offLogical), input.data.polarity.y(offLogical), '.r');
-	
+
 	% However, we will create an image from events with contrast, as used
 	% in jAER
 	% accumulate the array from the event indices, using an increment of 1
@@ -108,4 +108,3 @@ for plotCount = 1 : numPlots
     end
 	title([num2str(double(input.data.polarity.timeStamp(eventIndex)) / 1000000) ' s'])
 end
-

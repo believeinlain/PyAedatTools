@@ -1,11 +1,11 @@
 function ExportAedat2Polarity(aedat)
 
 """
-This function exports data to a .aedat file. 
+This function exports data to a .aedat file.
 The .aedat file format is documented here:
 
 http://inilabs.com/support/software/fileformat/
-"""	
+"""
 
 # Create the file
 if not 'exportParams' in aedat or not 'filePath' in aedat['exportParams']:
@@ -30,7 +30,7 @@ fprintf(f,'# End of ASCII Header\r\n');
 # DAVIS
 # In the 32-bit address:
 # bit 32 (1-based) being 1 indicates an APS sample
-# bit 11 (1-based) being 1 indicates a special event 
+# bit 11 (1-based) being 1 indicates a special event
 # bits 11 and 32 (1-based) both being zero signals a polarity event
 
 yShiftBits = 22;
@@ -47,5 +47,3 @@ output(2:2:end)=int32(input.data.polarity.timeStamp(:)); # set even elements to 
 count=fwrite(f,output,'uint32')/2; # write 4 byte data
 fclose(f);
 fprintf('wrote #d events to #s\n',count,input.info.filePath);
-
-

@@ -13,13 +13,13 @@ if ~exist('numBins', 'var') || (exist('numBins', 'var') && numBins == 0)
 	numBins = data.numEvents;
 end
 
-if exist('startTime', 'var') && startTime > 0 
+if exist('startTime', 'var') && startTime > 0
     startTime = startTime * 1e6;
 else
     startTime = input.info.firstTimeStamp;
 end
 
-if exist('endTime', 'var') && endTime > 0 
+if exist('endTime', 'var') && endTime > 0
     endTime = endTime * 1e6;
 else
     startTime = input.info.lastTimeStamp;
@@ -46,11 +46,11 @@ else
     gyroX  = zeros(numBins, 1);
     gyroY  = zeros(numBins, 1);
     gyroZ  = zeros(numBins, 1);
-    
+
     for bin = 1 : numBins
 		firstTimeStampIndex = find(data.timeStamp >= timeBinBoundariesUs(bin), 1, 'first');
 		lastTimeStampIndex = max(firstTimeStampIndex, find(data.timeStamp < timeBinBoundariesUs(bin + 1), 1, 'last'));
-		if ~isempty(firstTimeStampIndex) && ~isempty(lastTimeStampIndex) 
+		if ~isempty(firstTimeStampIndex) && ~isempty(lastTimeStampIndex)
 			accelX(bin) = mean(data.accelX(firstTimeStampIndex : lastTimeStampIndex));
 			accelY(bin) = mean(data.accelZ(firstTimeStampIndex : lastTimeStampIndex));
 			accelZ(bin) = mean(data.accelY(firstTimeStampIndex : lastTimeStampIndex));
@@ -87,6 +87,3 @@ legendLocal = [legendLocal 'gyroZ'];
 xlabel('Time (s)')
 ylabel('Angular veloicty (RPS? deg/s?)')
 legend(legendLocal)
-
-
-
