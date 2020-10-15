@@ -1,11 +1,9 @@
-# AedatTools
-Tools for manipulating .aedat files (timestamped address-event data from neuromorphic hardware), in Matlab and Python.
-
-I only forked this to keep the commits associated to my account. The original is at: https://github.com/qiaokaki/AedatTools Inivation are maintaining a matlab-only version at: https://gitlab.com/inivation/AedatTools
+# PyAedatTools
+Tools for manipulating .aedat files (timestamped address-event data from neuromorphic hardware), in Python.
 
 ## Overview
 
-The ImportAedat function imports data from a .aedat file into a 'struct' in the matlab workspace, or equivalently, a 'dict' in the python workspace. (hereafter 'structure').
+The ImportAedat function imports data from a .aedat file into a 'dict' in the python workspace. (hereafter 'structure').
 
 The .aedat file format is documented at:
 
@@ -67,5 +65,3 @@ timstamps are uint32 when imported from aedat2 and uint64 when imported from aed
 Import from aedat2 currently doesn't have a good method for excluding data before any timestamp resets.
 
 ExportAedat2 supports polarity, frames and imu6; it doesn't put xml metadata back into the file header.
-
-ExportRosbag not yet written in matlab, only python.
