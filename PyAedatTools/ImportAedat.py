@@ -6,9 +6,9 @@ ImportAedat
 Code contributions from Bodo Rueckhauser
 """
 
-from PyAedatTools.ImportAedatHeaders import ImportAedatHeaders
-from PyAedatTools.ImportAedatDataVersion1or2 import ImportAedatDataVersion1or2
-from PyAedatTools.ImportAedatDataVersion3 import ImportAedatDataVersion3
+from ImportAedatHeaders import ImportAedatHeaders
+from ImportAedatDataVersion1or2 import ImportAedatDataVersion1or2
+from ImportAedatDataVersion3 import ImportAedatDataVersion3
 
 def ImportAedat(aedat):
     """

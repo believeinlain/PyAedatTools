@@ -15,7 +15,7 @@ Code contributions from Bodo Rueckhauser
 
 """
 
-from PyAedatTools.BasicSourceName import BasicSourceName 
+from BasicSourceName import BasicSourceName 
 
 def ImportAedatHeaders(aedat):
 
@@ -47,6 +47,9 @@ def ImportAedatHeaders(aedat):
         # File format
         if line[: 8] == '!AER-DAT':
             info['fileFormat'] = int(line[8: -4])
+
+        sourceFromFile = '' # actually declare this variable so we remember it later
+        # whoever wrote this doesn't know what local variables are :/
 
         # Pick out the source
         # Version 2.0 encodes it like this:
@@ -135,6 +138,8 @@ def ImportAedatHeaders(aedat):
         sourceFromImportParams = BasicSourceName(importParams['source'])
         try:
             if sourceFromFile != sourceFromImportParams:
+                print("source given as input doesn't match the source from the file")
+                print("assuming source given as input")
                 #            fprintf('The source given as input, "#s", doesn''t match the source \
                 #            declared in the file, "#s"; assuming the source given as input.\n',
                 #             inputSource, info.Source)
@@ -147,6 +152,7 @@ def ImportAedatHeaders(aedat):
             info['source'] = sourceFromFile
         except UnboundLocalError:
             # If no source was detected, assume it was from a DVS128	
+            print('No source detected, assuming Dvs128')
             info['source'] = 'Dvs128'
         
     """

@@ -12,7 +12,7 @@ def FindFirstAndLastTimeStamps(aedat):
     # Also find first and last timeStamps
     
     if not 'data' in aedat:
-        print 'No data found from which to extract time stamps'
+        print('No data found from which to extract time stamps')
         return aedat
     
     firstTimeStamp = np.inf
@@ -20,7 +20,7 @@ def FindFirstAndLastTimeStamps(aedat):
     
     if 'special' in aedat['data']:
     	if aedat['data']['special']['timeStamp'][0] < firstTimeStamp:
-    		firstTimeStamp = aedat['data']['special.timeStamp'][0]
+    		firstTimeStamp = aedat['data']['special']['timeStamp'][0]
     	if aedat['data']['special']['timeStamp'][-1] > lastTimeStamp:
     		lastTimeStamp = aedat['data']['special']['timeStamp'][-1]
     
