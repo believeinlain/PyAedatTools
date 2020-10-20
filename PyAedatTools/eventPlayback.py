@@ -32,8 +32,9 @@ def playEventData(eventData, caption="Event Data Playback"):
     #clusters = ClusterFinder.findClusters(eventData, desired_dt)
     #print('Done filtering data for clusters')
 
-    # get SAE Frames to verify that works
-    #SAEFrames = SurfaceOfActiveEvents.getSAEFrames(eventData, 1, xLength, yLength, desired_dt)
+    # initialize the surface of active events
+    SAE = SurfaceOfActiveEvents.getInitialSAE(xLength, yLength)
+    eventsProcessed = 0
 
     # initialize pygame
     pygame.init()
@@ -70,7 +71,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                 # assume we update at the desired rate so we don't
                 # get bogged down with events
                 t = t + desired_dt
-                
+                """
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
                     # draw event to screen
@@ -81,22 +82,30 @@ def playEventData(eventData, caption="Event Data Playback"):
 
                     # increment events added
                     i = i + 1
-                
+                """
+                eventsProcessed = SurfaceOfActiveEvents.getUpdatedSAE(
+                    SAE, 
+                    eventsProcessed, 
+                    t, 
+                    eventData,
+                    1, 
+                    xLength, 
+                    yLength
+                )
                 """
                 # quit if we run out of frames
                 if f >= len(SAEFrames):
                     running = False
                     break
-                
+                """
                 # draw SAE Frame
                 for x in range(xLength):
                     for y in range(yLength):
                         frameTime = f*desired_dt
-                        age = abs(SAEFrames[f][x][y][0] - frameTime)
+                        age = abs(SAE[x][y][0] - frameTime)*0.01
                         brightness = max(255-age, 0)
                         color = (brightness, brightness, brightness)
-                        gfx.pixel(screen, x, y, color)
-                """
+                        gfx.pixel(screen, xLength-x, yLength-y, color)
                 """
                 # draw clusters for current frame
                 if (f < len(clusters)):

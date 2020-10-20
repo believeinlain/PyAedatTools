@@ -20,7 +20,7 @@ filename = "3.aedat"
 # aedat['importParams']['filePath'] = '/home/steph/aedata/Pedestrian Detection/Raw pedestrian data/'+filename
 aedat['importParams']['filePath'] = "C:/Users/saael/OneDrive/Documents/NIWC/NeuroComp/Miao_data/Pedestrian Detection/Raw pedestrian data/"+filename
 # aedat['importParams']['fileFormat'] = 'DAVIS'
-aedat['importParams']['endEvent'] = 1e6
+#aedat['importParams']['endEvent'] = 1e6
 
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
