@@ -27,9 +27,9 @@ def playEventData(eventData, caption="Event Data Playback"):
     desired_dt = 30
 
     # find clusters from data
-    print('Filtering data for clusters')
-    clusters = ClusterFinder.findClusters(eventData, desired_dt)
-    print('Done filtering data for clusters')
+    #print('Filtering data for clusters')
+    #clusters = ClusterFinder.findClusters(eventData, desired_dt)
+    #print('Done filtering data for clusters')
 
     # initialize pygame
     pygame.init()
@@ -79,9 +79,9 @@ def playEventData(eventData, caption="Event Data Playback"):
                     i = i + 1
 
                 # draw clusters for current frame
-                if (f < len(clusters)):
-                    for c in clusters[f]:
-                        pygame.draw.circle(screen, (255,0,0), (int(xLength-c.x), int(yLength-c.y)), 5)
+                #if (f < len(clusters)):
+                #    for c in clusters[f]:
+                #        pygame.draw.circle(screen, (255,0,0), (int(xLength-c.x), int(yLength-c.y)), 5)
 
                 # update the display
                 pygame.display.update()
