@@ -1,6 +1,8 @@
 # PyAedatTools
 Tools for manipulating .aedat files (timestamped address-event data from neuromorphic hardware), in Python.
 
+Much of the code has not yet been verified to work, but some aedat files can be imported and display correctly. See testImport.py for example usage.
+
 ## Overview
 
 The ImportAedat function imports data from a .aedat file into a 'dict' in the python workspace. (hereafter 'structure').
