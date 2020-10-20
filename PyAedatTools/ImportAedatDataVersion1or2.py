@@ -62,7 +62,7 @@ def ImportAedatDataVersion1or2(aedat):
     print('Reading events ...')
     fileHandle.seek(info['beginningOfDataPointer'] + numBytesPerEvent *
                      startEvent)
-    allEvents = np.fromfile(fileHandle, addrPrecision, numEventsToRead)
+    allEvents = np.fromfile(fileHandle, addrPrecision, int(numEventsToRead))
 
     allAddr = np.array(allEvents['addr'])
     allTs = np.array(allEvents['ts'])

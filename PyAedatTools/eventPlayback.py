@@ -3,6 +3,7 @@ import pygame
 import pygame.gfxdraw as gfx
 
 from PyAedatTools import ClusterFinder
+from PyAedatTools import SurfaceOfActiveEvents
 
 # playback event data using pygame
 def playEventData(eventData, caption="Event Data Playback"):
@@ -14,7 +15,7 @@ def playEventData(eventData, caption="Event Data Playback"):
     polarityArray = eventData['polarity']
 
     # pick an arbitrary x and y length
-    xLength = 345
+    xLength = 350
     yLength = 260
 
     # speed to playback events
@@ -24,12 +25,15 @@ def playEventData(eventData, caption="Event Data Playback"):
     blendRate = 20
 
     # milliseconds to update frame
-    desired_dt = 30
+    desired_dt = 60
 
     # find clusters from data
     #print('Filtering data for clusters')
     #clusters = ClusterFinder.findClusters(eventData, desired_dt)
     #print('Done filtering data for clusters')
+
+    # get SAE Frames to verify that works
+    #SAEFrames = SurfaceOfActiveEvents.getSAEFrames(eventData, 1, xLength, yLength, desired_dt)
 
     # initialize pygame
     pygame.init()
@@ -66,7 +70,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                 # assume we update at the desired rate so we don't
                 # get bogged down with events
                 t = t + desired_dt
-
+                
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
                     # draw event to screen
@@ -77,12 +81,28 @@ def playEventData(eventData, caption="Event Data Playback"):
 
                     # increment events added
                     i = i + 1
-
+                
+                """
+                # quit if we run out of frames
+                if f >= len(SAEFrames):
+                    running = False
+                    break
+                
+                # draw SAE Frame
+                for x in range(xLength):
+                    for y in range(yLength):
+                        frameTime = f*desired_dt
+                        age = abs(SAEFrames[f][x][y][0] - frameTime)
+                        brightness = max(255-age, 0)
+                        color = (brightness, brightness, brightness)
+                        gfx.pixel(screen, x, y, color)
+                """
+                """
                 # draw clusters for current frame
-                #if (f < len(clusters)):
-                #    for c in clusters[f]:
-                #        pygame.draw.circle(screen, (255,0,0), (int(xLength-c.x), int(yLength-c.y)), 5)
-
+                if (f < len(clusters)):
+                    for c in clusters[f]:
+                        pygame.draw.circle(screen, (255,0,0), (int(xLength-c.x), int(yLength-c.y)), 5)
+                """
                 # update the display
                 pygame.display.update()
 
