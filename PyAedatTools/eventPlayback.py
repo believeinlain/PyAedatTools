@@ -2,8 +2,6 @@
 import pygame
 import pygame.gfxdraw as gfx
 
-from PyAedatTools import ClusterFinder
-from PyAedatTools import SurfaceOfActiveEvents
 from PyAedatTools import ArcStar
 
 # playback event data using pygame
@@ -28,14 +26,8 @@ def playEventData(eventData, caption="Event Data Playback"):
     # milliseconds to update frame
     desired_dt = 30
 
-    # find clusters from data
-    #print('Filtering data for clusters')
-    #clusters = ClusterFinder.findClusters(eventData, desired_dt)
-    #print('Done filtering data for clusters')
-
     # initialize the surface of active events
-    SAE = SurfaceOfActiveEvents.getInitialSAE(xLength, yLength)
-    eventsProcessed = 0
+    SAE = ArcStar.getInitialSAE(xLength, yLength)
 
     # initialize pygame
     pygame.init()
@@ -73,53 +65,25 @@ def playEventData(eventData, caption="Event Data Playback"):
                 # get bogged down with events
                 t = t + desired_dt
                 
-                eventsProcessed = SurfaceOfActiveEvents.getUpdatedSAE(
-                    SAE, 
-                    eventsProcessed, 
-                    t, 
-                    eventData,
-                    1, 
-                    xLength, 
-                    yLength
-                )
-                
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
+                    # update the SAE for the current event
+                    ArcStar.updateSAE(SAE, eventData, i, 1, xLength, yLength)
+
                     # draw event to screen
-                    #color = (0,0,0)
+                    color = (0,0,0)
                     if polarityArray[i] == 1:
+                        # use Arc* to determine if the event is a corner
                         if ArcStar.isEventCorner(SAE, xArray[i], yArray[i]):
-                            pygame.draw.circle(screen, (255, 0, 0), (xLength-xArray[i], yLength-yArray[i]), 5)
-                            #print("Found corner at ", xArray[i], yArray[i])
+                            color = (255,0,0)
                         else:
                             color = (255,255,255)
-                            gfx.pixel(screen, xLength-xArray[i], yLength-yArray[i], color)
+                    
+                    gfx.pixel(screen, xLength-xArray[i], yLength-yArray[i], color)
 
                     # increment events added
                     i = i + 1
                 
-                """
-                # quit if we run out of frames
-                if f >= len(SAEFrames):
-                    running = False
-                    break
-                """
-                """
-                # draw SAE to screen
-                for x in range(xLength):
-                    for y in range(yLength):
-                        frameTime = f*desired_dt
-                        age = abs(SAE[x][y][0] - frameTime)*0.01
-                        brightness = max(255-age, 0)
-                        color = (brightness, brightness, brightness)
-                        gfx.pixel(screen, xLength-x, yLength-y, color)
-                """
-                """
-                # draw clusters for current frame
-                if (f < len(clusters)):
-                    for c in clusters[f]:
-                        pygame.draw.circle(screen, (255,0,0), (int(xLength-c.x), int(yLength-c.y)), 5)
-                """
                 # update the display
                 pygame.display.update()
 

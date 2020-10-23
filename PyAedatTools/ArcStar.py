@@ -26,6 +26,30 @@ CircleMask3 = [
     (-1, 3)
 ]
 
+# initialize 2d array of zero tuples where each tuple is (tr, tl)
+def getInitialSAE(width, height):
+    return [[(0, 0) for i in range(height)] for j in range(width)]
+
+# update the SAE for a single event
+def updateSAE(SAE, eventData, i, polarity, width, height, k=50):
+    timeStamp = eventData['timeStamp'][i]
+    x = eventData['x'][i]
+    y = eventData['y'][i]
+    ePolarity = eventData['polarity'][i]
+
+    startTime = eventData['timeStamp'][0]
+
+    # get event time relative to time 0
+    t = timeStamp-startTime
+
+    # only filter events that match desired polarity
+    if ePolarity == polarity:
+        # update tr only if t > tl + k
+        if t > SAE[x][y][1]+k:
+            SAE[x][y] = (t, SAE[x][y][1])
+        # always update tl
+        SAE[x][y] = (SAE[x][y][0], t)
+
 def isEventCorner(SAE, eX, eY):
     #print("Evaluating event at ", eX, eY)
     # get circle coordinates
