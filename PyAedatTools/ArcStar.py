@@ -1,30 +1,39 @@
 # Arc* algorithm uses SurfaceOfActiveEvents to determine
 # if an incoming event is a corner
 
-radius = 3 # 4
-Lmin = 3 # 4
-Lmax = 6 # 8
+from math import atan2
+from math import pi
 
-# define relative pixel positions for a circle mask
-# of radius 3
-CircleMask3 = [
-    (0, 3),
-    (1, 3),
-    (2, 2),
-    (3, 1),
-    (3, 0),
-    (3, -1),
-    (2, -2),
-    (1, -3),
-    (0, -3),
-    (-1, -3),
-    (-2, -2),
-    (-3, -1),
-    (-3, 0),
-    (-3, 1),
-    (-2, 1),
-    (-1, 3)
-]
+# create a circle mask with a given radius
+# TODO: verify circle mask for radius other than 3 is correct
+def createCircleMask(radius):
+    # size of the pixel array to iterate through
+    size = 2*radius+1
+
+    # should be a float result (do we need to cast?)
+    center = (size/2, size/2)
+
+    # dict of angle/point pairs to sort points on circle
+    points = {}
+
+    # iterate through pixels and turn them on if they are on circle edge
+    # (x,y) from top left
+    for x in range(size):
+        for y in range(size):
+            # calculate pixel center
+            pixel = (x+0.5, y+0.5)
+            # find distance**2 to center
+            distSq = (center[0]-pixel[0])**2 + (center[1]-pixel[1])**2
+            # if pixel is on radius, add it to the set of points
+            if abs(radius**2 - distSq) < 2: # TODO: tweak this maybe?
+                # get angle (to order points clockwise)
+                angle = pi - atan2( pixel[1]-center[1], pixel[0]-center[0] )
+
+                # add the point
+                points[angle] = (x-radius, y-radius)
+    
+    # sort the points by angle and return
+    return [value for (key, value) in sorted(points.items())]
 
 # initialize 2d array of zero tuples where each tuple is (tr, tl)
 def getInitialSAE(width, height):
@@ -50,10 +59,14 @@ def updateSAE(SAE, eventData, i, polarity, width, height, k=50):
         # always update tl
         SAE[x][y] = (SAE[x][y][0], t)
 
-def isEventCorner(SAE, eX, eY):
+def isEventCorner(SAE, eX, eY, circleRadius=3):
+    # min and max arclengths to detect a corner
+    Lmin = circleRadius
+    Lmax = 2*circleRadius
+
     #print("Evaluating event at ", eX, eY)
     # get circle coordinates
-    Circle = [(eX+m[0], eY+m[1]) for m in CircleMask3]
+    Circle = [(eX+m[0], eY+m[1]) for m in createCircleMask(circleRadius)]
 
     # get SAE dimensions
     width = len(SAE)

@@ -77,7 +77,9 @@ def playEventData(eventData, caption="Event Data Playback"):
                     color = (0,0,0)
                     if polarityArray[i] == 1:
                         # use Arc* to determine if the event is a corner
-                        if ArcStar.isEventCorner(SAE, xArray[i], yArray[i]):
+                        # checking circle masks of radius 3 and 4
+                        if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3) \
+                            and ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3):
                             color = (255,0,0)
                         else:
                             color = (255,255,255)
