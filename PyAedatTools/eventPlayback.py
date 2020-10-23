@@ -67,7 +67,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                 running = False
             elif event.type == UPDATE:
                 # fill screen with grey
-                #screen.blit(fade, (0,0))
+                screen.blit(fade, (0,0))
 
                 # assume we update at the desired rate so we don't
                 # get bogged down with events
@@ -89,8 +89,8 @@ def playEventData(eventData, caption="Event Data Playback"):
                     #color = (0,0,0)
                     if polarityArray[i] == 1:
                         if ArcStar.isEventCorner(SAE, xArray[i], yArray[i]):
-                            pygame.draw.circle(screen, (255, 0, 0), (xLength-xArray[i], yLength-yArray[i]), 10)
-                            print("Found corner at ", xArray[i], yArray[i])
+                            pygame.draw.circle(screen, (255, 0, 0), (xLength-xArray[i], yLength-yArray[i]), 5)
+                            #print("Found corner at ", xArray[i], yArray[i])
                         else:
                             color = (255,255,255)
                             gfx.pixel(screen, xLength-xArray[i], yLength-yArray[i], color)
@@ -104,7 +104,8 @@ def playEventData(eventData, caption="Event Data Playback"):
                     running = False
                     break
                 """
-                # draw SAE Frame
+                """
+                # draw SAE to screen
                 for x in range(xLength):
                     for y in range(yLength):
                         frameTime = f*desired_dt
@@ -112,6 +113,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                         brightness = max(255-age, 0)
                         color = (brightness, brightness, brightness)
                         gfx.pixel(screen, xLength-x, yLength-y, color)
+                """
                 """
                 # draw clusters for current frame
                 if (f < len(clusters)):
