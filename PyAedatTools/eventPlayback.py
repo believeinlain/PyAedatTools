@@ -4,6 +4,7 @@ import pygame.gfxdraw as gfx
 
 from PyAedatTools import ClusterFinder
 from PyAedatTools import SurfaceOfActiveEvents
+from PyAedatTools import ArcStar
 
 # playback event data using pygame
 def playEventData(eventData, caption="Event Data Playback"):
@@ -16,7 +17,7 @@ def playEventData(eventData, caption="Event Data Playback"):
 
     # pick an arbitrary x and y length
     xLength = 350
-    yLength = 260
+    yLength = 265
 
     # speed to playback events
     speed = 200
@@ -25,7 +26,7 @@ def playEventData(eventData, caption="Event Data Playback"):
     blendRate = 20
 
     # milliseconds to update frame
-    desired_dt = 60
+    desired_dt = 30
 
     # find clusters from data
     #print('Filtering data for clusters')
@@ -66,23 +67,12 @@ def playEventData(eventData, caption="Event Data Playback"):
                 running = False
             elif event.type == UPDATE:
                 # fill screen with grey
-                screen.blit(fade, (0,0))
+                #screen.blit(fade, (0,0))
 
                 # assume we update at the desired rate so we don't
                 # get bogged down with events
                 t = t + desired_dt
-                """
-                # add events until timeStamp > time since init
-                while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
-                    # draw event to screen
-                    color = (0,0,0)
-                    if polarityArray[i] == 1:
-                        color = (255,255,255)
-                    gfx.pixel(screen, xLength-xArray[i], yLength-yArray[i], color)
-
-                    # increment events added
-                    i = i + 1
-                """
+                
                 eventsProcessed = SurfaceOfActiveEvents.getUpdatedSAE(
                     SAE, 
                     eventsProcessed, 
@@ -92,6 +82,22 @@ def playEventData(eventData, caption="Event Data Playback"):
                     xLength, 
                     yLength
                 )
+                
+                # add events until timeStamp > time since init
+                while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
+                    # draw event to screen
+                    #color = (0,0,0)
+                    if polarityArray[i] == 1:
+                        if ArcStar.isEventCorner(SAE, xArray[i], yArray[i]):
+                            pygame.draw.circle(screen, (255, 0, 0), (xLength-xArray[i], yLength-yArray[i]), 10)
+                            print("Found corner at ", xArray[i], yArray[i])
+                        else:
+                            color = (255,255,255)
+                            gfx.pixel(screen, xLength-xArray[i], yLength-yArray[i], color)
+
+                    # increment events added
+                    i = i + 1
+                
                 """
                 # quit if we run out of frames
                 if f >= len(SAEFrames):
