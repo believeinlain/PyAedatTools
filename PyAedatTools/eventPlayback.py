@@ -18,7 +18,7 @@ def playEventData(eventData, caption="Event Data Playback"):
     yLength = 265
 
     # speed to playback events
-    speed = 200
+    speed = 100
 
     # how fast events fade
     blendRate = 20
@@ -64,6 +64,9 @@ def playEventData(eventData, caption="Event Data Playback"):
                 # assume we update at the desired rate so we don't
                 # get bogged down with events
                 t = t + desired_dt
+
+                # get reference to screen pixels as 3d array [x][y][color]
+                pixels = pygame.surfarray.pixels3d(screen)
                 
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
@@ -74,15 +77,20 @@ def playEventData(eventData, caption="Event Data Playback"):
                     color = (0,0,0)
                     if polarityArray[i] == 1:
                         # use Arc* to determine if the event is a corner
-                        if ArcStar.isEventCorner(SAE, xArray[i], yArray[i]):
+                        # checking circle masks of radius 3 and 4
+                        if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3) \
+                            and ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3):
                             color = (255,0,0)
                         else:
                             color = (255,255,255)
                     
-                    gfx.pixel(screen, xLength-xArray[i], yLength-yArray[i], color)
+                    for j in range(3):
+                        pixels[ xLength-xArray[i]-1 ][ yLength-yArray[i]-1 ][j] = color[j]
 
                     # increment events added
                     i = i + 1
+
+                del pixels
                 
                 # update the display
                 pygame.display.update()
