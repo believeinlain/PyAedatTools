@@ -35,6 +35,10 @@ def createCircleMask(radius):
     # sort the points by angle and return
     return [value for (key, value) in sorted(points.items())]
 
+# create global circle masks so we don't compute them each time they're used
+CircleMask3 = createCircleMask(3)
+CircleMask4 = createCircleMask(4)
+
 # initialize 2d array of zero tuples where each tuple is (tr, tl)
 def getInitialSAE(width, height):
     return [[(0, 0) for i in range(height)] for j in range(width)]
@@ -64,9 +68,17 @@ def isEventCorner(SAE, eX, eY, circleRadius=3):
     Lmin = circleRadius
     Lmax = 2*circleRadius
 
+    # choose the right circleMask
+    if circleRadius == 3:
+        circleMask = CircleMask3
+    elif circleRadius == 4:
+        circleMask = CircleMask4
+    else:
+        circleMask = createCircleMask(circleRadius)
+
     #print("Evaluating event at ", eX, eY)
     # get circle coordinates
-    Circle = [(eX+m[0], eY+m[1]) for m in createCircleMask(circleRadius)]
+    Circle = [(eX+m[0], eY+m[1]) for m in circleMask]
 
     # get SAE dimensions
     width = len(SAE)
