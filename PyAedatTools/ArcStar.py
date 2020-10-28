@@ -39,8 +39,8 @@ def createCircleMask(radius, thickness=2):
 CircleMask3 = createCircleMask(3, 2)
 CircleMask4 = createCircleMask(4, 3) # thickness 3 leaves gaps but thickness 4 overlaps
 
-print([(c[0]+3,c[1]+3) for c in CircleMask3])
-print([(c[0]+4,c[1]+4) for c in CircleMask4])
+#print([(c[0]+3,c[1]+3) for c in CircleMask3])
+#print([(c[0]+4,c[1]+4) for c in CircleMask4])
 
 # initialize 2d array of zero tuples where each tuple is (tr, tl)
 def getInitialSAE(width, height):
@@ -66,6 +66,8 @@ def updateSAE(SAE, eventData, i, polarity, width, height, k=50):
         # always update tl
         SAE[x][y] = (SAE[x][y][0], t)
 
+# determine if a new event is a corner
+# TODO: this needs a lot of optimization, way too many for loops
 def isEventCorner(SAE, eX, eY, circleRadius=3):
     # min and max arclengths to detect a corner
     Lmin = circleRadius
@@ -79,7 +81,6 @@ def isEventCorner(SAE, eX, eY, circleRadius=3):
     else:
         circleMask = createCircleMask(circleRadius)
 
-    #print("Evaluating event at ", eX, eY)
     # get circle coordinates
     Circle = [(eX+m[0], eY+m[1]) for m in circleMask]
 

@@ -1,6 +1,4 @@
 
-from PyAedatTools import QuadTree
-
 class VertexTree:
     def __init__(self, t, x, y, parent=None):
         self.t = t
@@ -29,8 +27,9 @@ class VertexTree:
     # find oldest root, and strip all branches that don't have
     # leaves younger than threshold. If the oldest root is 
     # older than maxAge, kill it
+    # returns oldest root we just killed
     # TODO: what was childFrom for again?
-    def prune(self, quadTree, maxAge, threshold, currentTime, childFrom=None):
+    def prune(self, rootList, quadTree, maxAge, threshold, currentTime, childFrom=None):
         # strip branches if they don't have young enough children
         for child in self.children:
             if currentTime - child.getYoungestChild().t < threshold:
@@ -47,9 +46,11 @@ class VertexTree:
                 # but don't strip
                 for child in self.children:
                     child.parent = None
-                # any children with young enough branches will become roots
-                # TODO: maybe we should keep track of these roots? They might become
-                # forgotten using this approach
+                    # add each child to rootList since they will be roots now
+                    rootList.append(child)
+                # remove the old root from rootList and quadTree since it's dead
+                quadTree.removeVertex(self)
+                rootList.remove(self)
     
     # recursively find the youngest child in all the branches
     def getYoungestChild(self):
