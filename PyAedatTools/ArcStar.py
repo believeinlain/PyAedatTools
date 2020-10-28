@@ -6,7 +6,7 @@ from math import pi
 
 # create a circle mask with a given radius
 # TODO: verify circle mask for radius other than 3 is correct
-def createCircleMask(radius):
+def createCircleMask(radius, thickness=2):
     # size of the pixel array to iterate through
     size = 2*radius+1
 
@@ -25,7 +25,7 @@ def createCircleMask(radius):
             # find distance**2 to center
             distSq = (center[0]-pixel[0])**2 + (center[1]-pixel[1])**2
             # if pixel is on radius, add it to the set of points
-            if abs(radius**2 - distSq) < 2: # TODO: tweak this maybe?
+            if abs(radius**2 - distSq) < thickness:
                 # get angle (to order points clockwise)
                 angle = pi - atan2( pixel[1]-center[1], pixel[0]-center[0] )
 
@@ -36,8 +36,11 @@ def createCircleMask(radius):
     return [value for (key, value) in sorted(points.items())]
 
 # create global circle masks so we don't compute them each time they're used
-CircleMask3 = createCircleMask(3)
-CircleMask4 = createCircleMask(4)
+CircleMask3 = createCircleMask(3, 2)
+CircleMask4 = createCircleMask(4, 3) # thickness 3 leaves gaps but thickness 4 overlaps
+
+print([(c[0]+3,c[1]+3) for c in CircleMask3])
+print([(c[0]+4,c[1]+4) for c in CircleMask4])
 
 # initialize 2d array of zero tuples where each tuple is (tr, tl)
 def getInitialSAE(width, height):
