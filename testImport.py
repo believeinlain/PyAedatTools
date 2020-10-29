@@ -18,7 +18,7 @@ aedat['importParams'] = {}
 filename = "3.aedat"
 
 # aedat['importParams']['filePath'] = '/home/steph/aedata/Pedestrian Detection/Raw pedestrian data/'+filename
-aedat['importParams']['filePath'] = "C:/Users/saael/OneDrive/Documents/NIWC/NeuroComp/Miao_data/Pedestrian Detection/Raw pedestrian data/"+filename
+aedat['importParams']['filePath'] = "./example_data/"+filename
 # aedat['importParams']['fileFormat'] = 'DAVIS'
 #aedat['importParams']['endEvent'] = 1e6
 
