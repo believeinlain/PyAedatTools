@@ -1,6 +1,5 @@
 
 from PyAedatTools import DataTypes
-from DataTypes import Point
 
 # QuadTree divides a 2d array of pixels into subquadrants no larger than minSize
 # when a vertex is added new branches will be added until the size of a quadrant
@@ -39,7 +38,8 @@ class QuadTree:
         # if this leaf is storing vertices, then it has no subQuads
         # so just remove the vertex from this structure and return
         if len(self.vertices) > 0:
-            self.vertices.remove(vertex)
+            if vertex in self.vertices: # TODO: we shouldn't have to check
+                self.vertices.remove(vertex)
         # otherwise keep traversing to the correct leaf
         else:
             subQuad = self.getSubQuadrant(vertex.x, vertex.y)
@@ -55,7 +55,7 @@ class QuadTree:
         if len(self.vertices) > 0:
             for v in self.vertices:
                 # add vertices within range (taxicab distance)
-                if ( abs(loc.x - v.x) + abs(loc.y - v.y) ) <= dist:
+                if ( abs(int(loc.x - v.x)) + abs(int(loc.y - v.y)) ) <= dist:
                     results.append(v)
 
             return results
@@ -101,4 +101,4 @@ class QuadTree:
         halfY = int(self.center.y/2)
         offsetX = subX-0.5
         offsetY = subY-0.5
-        return Point(x=self.center.x+offsetX*halfX, y=self.center.y+offsetY*halfY)
+        return DataTypes.Point(x=self.center.x+offsetX*halfX, y=self.center.y+offsetY*halfY)
