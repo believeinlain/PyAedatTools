@@ -1,12 +1,16 @@
 
 from PyAedatTools import DataTypes
 
+# interpret warnings as errors for debugging
+import warnings
+warnings.filterwarnings('error')
+
 # QuadTree divides a 2d array of pixels into subquadrants no larger than minSize
 # when a vertex is added new branches will be added until the size of a quadrant
 # is smaller than minSize
 # the tree can then be traversed to find a verts within range of a query
 class QuadTree:
-    def __init__(self, center, width, height, minSize=50, depth=0):
+    def __init__(self, center, width, height, minSize, depth=0):
         # quadrants are indexed by self.leaf[x][y]
         self.leaf = [[None, None], [None, None]]
         self.vertices = []
@@ -15,6 +19,9 @@ class QuadTree:
         self.height = height
         self.center = center
         self.minSize = minSize
+        #print("depth", depth)
+        #print("width", width)
+        #print("minSize", minSize)
     
     # vertex should be a named tuple with fields (t, x, y)
     # recursively adds subquadrants until we've reached minSize
@@ -40,10 +47,16 @@ class QuadTree:
         if len(self.vertices) > 0:
             if vertex in self.vertices: # TODO: we shouldn't have to check
                 self.vertices.remove(vertex)
+            else:
+                print("Subquad storing vertices doesn't have desired vertex!")
         # otherwise keep traversing to the correct leaf
         else:
             subQuad = self.getSubQuadrant(vertex.x, vertex.y)
-            self.leaf[subQuad[0]][subQuad[1]].removeVertex(vertex)
+            leafContainingVertex = self.leaf[subQuad[0]][subQuad[1]]
+            if leafContainingVertex is not None:
+                leafContainingVertex.removeVertex(vertex)
+            else:
+                print("Tried to delete vertex in quad that doesn't exist!")
 
     # traverse quadtree to find all vertices within distance of loc
     def getVerticesWithinDistance(self, loc, dist):
@@ -55,7 +68,7 @@ class QuadTree:
         if len(self.vertices) > 0:
             for v in self.vertices:
                 # add vertices within range (taxicab distance)
-                if ( abs(int(loc.x - v.x)) + abs(int(loc.y - v.y)) ) <= dist:
+                if ( abs(int(loc.x) - int(v.x)) + abs(int(loc.y) - int(v.y)) ) <= dist:
                     results.append(v)
 
             return results

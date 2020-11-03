@@ -5,7 +5,6 @@ Example script for how to invoke the ImportAedat function
 
 import sys
 import numpy as np
-# import matplotlib.pyplot as plt
 from PyAedatTools import ImportAedat
 from PyAedatTools import EventPlayback
 

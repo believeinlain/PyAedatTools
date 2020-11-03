@@ -2,7 +2,6 @@
 import sys
 
 import pygame
-import pygame.gfxdraw as gfx
 
 from PyAedatTools import ArcStar
 from PyAedatTools import CornerTracking
@@ -24,10 +23,10 @@ def playEventData(eventData, caption="Event Data Playback"):
     speed = 100
 
     # how fast events fade
-    blendRate = 20
+    blendRate = 5
 
     # milliseconds to update frame
-    desired_dt = 30
+    desired_dt = 10
 
     # initialize the surface of active events
     SAE = ArcStar.getInitialSAE(xLength, yLength)
@@ -55,8 +54,15 @@ def playEventData(eventData, caption="Event Data Playback"):
     # keep track of frames drawn
     f = 0
 
+    # tracking parameters
+    quadRes = 10
+    trackRange = 10
+    trackDeltaT = 150
+    maxAge = 150
+    threshold = 150
+
     # track corners
-    tracker = CornerTracking.CornerTracker(xLength, yLength, 50, 5, 100, 500, 150)
+    tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, maxAge, threshold)
 
     running = True
     while running:
@@ -91,8 +97,8 @@ def playEventData(eventData, caption="Event Data Playback"):
                                 color = (255,0,0)
                             else:
                                 color = pygame.Color(0)
-                                print("Corner tracked, angle:", angle)
                                 color.hsva = (angle*360, 100, 100, 100)
+                                pygame.draw.circle(screen, color, (xLength-xArray[i]-1, yLength-yArray[i]-1), 5)
                         else:
                             color = (255,255,255)
                     

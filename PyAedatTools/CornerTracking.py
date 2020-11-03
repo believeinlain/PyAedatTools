@@ -29,7 +29,7 @@ class CornerTracker:
             self.vertexTreeRoots.append(newVert)
         else:
             # attach to the closest neighbor
-            newVert = min({(n.x-x)**2+(n.y-y)**2:n for n in neighbors}.items())[1].birth(t, x, y)
+            newVert = min({(int(n.x)-x)**2+(int(n.y)-y)**2:n for n in neighbors}.items())[1].birth(t, x, y)
         
         # add new vert to quadTree
         self.quadTree.addVertex(newVert)
@@ -39,10 +39,9 @@ class CornerTracker:
 
         if root is not None:
             # now we can compare the root to the new event to get velocity
-            dt = t-root.t
-            dx = x-root.x
-            dy = y-root.y
-            #v = (dx/dt, dy/dt)
+            dt = float(t)-float(root.t)
+            dx = float(x)-float(root.x)
+            dy = float(y)-float(root.y)
 
             # find and return the angle of trajectory (from 0 to 1)
             return ( atan2(dx/dt, dy/dt)+pi ) / (2*pi)

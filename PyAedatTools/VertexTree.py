@@ -22,7 +22,7 @@ class VertexTree:
 
         # delete reference to self by parent
         if self.parent is not None:
-            self.parent.child = None
+            self.parent.children.remove(self)
     
     # find oldest root, and strip all branches that don't have
     # leaves younger than threshold. If the oldest root is 
@@ -31,12 +31,12 @@ class VertexTree:
     def prune(self, rootList, quadTree, maxAge, threshold, currentTime):
         # strip branches if they don't have young enough children
         for child in self.children:
-            if (currentTime - child.getYoungestChild().t) < threshold:
+            if (currentTime - child.getYoungestChild().t) > threshold:
                 child.strip(quadTree)
                 self.children.remove(child)
         # recursively find oldest root
         if self.parent is not None:
-            self.parent.prune(rootList, quadTree, maxAge, threshold, currentTime)
+            return self.parent.prune(rootList, quadTree, maxAge, threshold, currentTime)
         # this must be the oldest root
         else:
             # if it's too old
