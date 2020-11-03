@@ -28,7 +28,7 @@ class VertexTree:
     # leaves younger than threshold. If the oldest root is 
     # older than maxAge, kill it
     # returns oldest root we just killed
-    def prune(self, rootList, quadTree, maxAge, threshold, currentTime):
+    def prune(self, rootList, quadTree, minAge, threshold, currentTime):
         # strip branches if they don't have young enough children
         for child in self.children:
             if (currentTime - child.getYoungestChild().t) > threshold:
@@ -36,21 +36,12 @@ class VertexTree:
                 self.children.remove(child)
         # recursively find oldest root
         if self.parent is not None:
-            return self.parent.prune(rootList, quadTree, maxAge, threshold, currentTime)
+            return self.parent.prune(rootList, quadTree, minAge, threshold, currentTime)
         # this must be the oldest root
         else:
-            # if it's too old
-            if currentTime - self.t > maxAge:
-                # remove all references to this root
-                # but don't strip
-                for child in self.children:
-                    child.parent = None
-                    # add each child to rootList since they will be roots now
-                    rootList.append(child)
-                # remove the old root from rootList and quadTree since it's dead
-                quadTree.removeVertex(self)
-                rootList.remove(self)
-                return self
+            # if it's old enough
+            if currentTime - self.t > minAge:
+                return self.delete(rootList, quadTree)
         
         return None
     
@@ -59,6 +50,19 @@ class VertexTree:
         newVert = VertexTree(t, x, y, self)
         self.children.append(newVert)
         return newVert
+    
+    # delete this tree node and all references to it
+    def delete(self, rootList, quadTree):
+        # remove all references to this root
+        # but don't strip
+        for child in self.children:
+            child.parent = None
+            # add each child to rootList since they will be roots now
+            rootList.append(child)
+        # remove the old root from rootList and quadTree since it's dead
+        quadTree.removeVertex(self)
+        rootList.remove(self)
+        return self
     
     # recursively find the youngest child in all the branches
     def getYoungestChild(self):

@@ -55,14 +55,15 @@ def playEventData(eventData, caption="Event Data Playback"):
     f = 0
 
     # tracking parameters
-    quadRes = 10
+    quadRes = 5
     trackRange = 10
-    trackDeltaT = 150
-    maxAge = 150
-    threshold = 150
+    trackDeltaT = 200
+    minAge = 100
+    threshold = 200
+    maxAge = 500
 
     # track corners
-    tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, maxAge, threshold)
+    tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, minAge, threshold, maxAge)
 
     running = True
     while running:
@@ -119,5 +120,8 @@ def playEventData(eventData, caption="Event Data Playback"):
 
                 # increment frames drawn
                 f = f + 1
+
+                # clean old roots
+                tracker.cleanRoots(t)
 
     pygame.quit()
