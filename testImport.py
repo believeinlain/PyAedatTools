@@ -35,5 +35,4 @@ eventData = {
 }
 
 # playback the event data
-
 EventPlayback.playEventData(eventData, filename)

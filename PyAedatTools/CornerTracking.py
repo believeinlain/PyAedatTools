@@ -11,8 +11,8 @@ from math import pi
 # quadTreeRes: how small to divide the quadTree (smaller res = more memory usage but faster search)
 # trackRange: range around each event to search for vertices to attach to
 # trackDeltaT: timeframe to search before each event for vertices to attach to
-# maxAge: how old should we need a root to be before tracking a corner
-# threshold: branches in which the youngest vertex is older than threshold will be pruned
+# minAge: how old should we need a root to be before tracking a corner
+# threshold: branches in which the youngest vertex is older than threshold will be stripped
 # maxAge: roots older than this will just be removed if they haven't been pruned yet
 class CornerTracker:
     def __init__(self, width, height, quadTreeRes, trackRange, trackDeltaT, minAge, threshold, maxAge):
@@ -43,10 +43,11 @@ class CornerTracker:
         self.quadTree.addVertex(newVert)
 
         # prune the tree and get the oldest root if it was older than maxAge
-        root = newVert.prune(self.vertexTreeRoots, self.quadTree, self.minAge, self.threshold, t)
+        root = newVert.prune(self.vertexTreeRoots, self.quadTree, self.minAge, self.maxAge, self.threshold, t)
 
         if root is not None:
-            # now we can compare the root to the new event to get velocity
+            # now we can compare the root to the new event to get angle
+            # TODO: This doesn't really seem to work
             dt = float(t)-float(root.t)
             dx = float(x)-float(root.x)
             dy = float(y)-float(root.y)
