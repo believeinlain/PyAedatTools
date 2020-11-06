@@ -73,9 +73,9 @@ def playEventData(eventData, caption="Event Data Playback"):
     #tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, minAge, threshold, maxAge)
 
     # cluster tracking parameters
-    maxBufferSize = 1e4
-    newEventWeight = 0.1
-    clusteringThreshold = 10
+    maxBufferSize = 100
+    newEventWeight = 0.9
+    clusteringThreshold = 5
     numClusteringSamples = 50
 
     # track clusters
