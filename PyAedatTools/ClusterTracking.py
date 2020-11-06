@@ -21,39 +21,37 @@ class Cluster:
     
     # update centroid weighted average
     def updateCentroid(self, e, eventWeight):
-        self.x = int((eventWeight*e.x + (1-eventWeight)*self.x))
-        self.y = int((eventWeight*e.y + (1-eventWeight)*self.y))
+        self.x = int((eventWeight*float(e.x) + (1-eventWeight)*float(self.x)))
+        self.y = int((eventWeight*float(e.y) + (1-eventWeight)*float(self.y)))
 
     # remove events with timestamp <= oldestEventTimestamp
     # return True iff there are any events left
     def removeOldEvents(self, oldestEventTimestamp):
-        for e in self.events:
-            if e.t <= oldestEventTimestamp:
-                self.events.remove(e)
-            else:
-                return True if len(self.events)>0 else False
+        self.events = list(filter(lambda e: e.t > oldestEventTimestamp, self.events))
+        return len(self.events)>0
     
     # sample numClusteringSamples from self.events and if any are
     # closer than clusteringThreshold by manhattan distance return True
     def isCloseToEvent(self, x, y, clusteringThreshold, numClusteringSamples):
+        # compare proximity to the centroid
+        if ( abs(x - self.x) + abs(y - self.y) ) <= clusteringThreshold:
+            return True
+        
         for e in ( sample(self.events, numClusteringSamples) if len(self.events)>numClusteringSamples else self.events ):
-            if ( abs(x - e.x) + abs(y - e.y) ) < clusteringThreshold:
+            # compare proximity to a sample of events
+            if ( abs(x - e.x) + abs(y - e.y) ) <= clusteringThreshold:
                 return True
+        
         return False
     
     # merge this cluster with other together
-    def mergeClusters(self, other, eventWeight):
+    def mergeClusters(self, other):
         # merge event list while keeping sorted by timestamp
         self.events = list(merge(self.events, other.events, key=lambda e: e.t))
 
-        # reset centroid to first event
-        self.x = self.events[0].x
-        self.y = self.events[0].y
-
-        # update the centroid for the new merged event list
-        # TODO maybe don't update the first event again since that won't do anything
-        for e in self.events:
-            self.updateCentroid(e, eventWeight)
+        # merge the clusters together with even weight
+        self.x = int( (float(other.x) + float(self.x)) / 2)
+        self.y = int( (float(other.y) + float(self.y)) / 2)
 
 
 # maxBufferSize: max number of events to keep in eventBuffer
@@ -90,21 +88,16 @@ class ClusterTracker:
             if c.isCloseToEvent(x, y, self.clusteringThreshold, self.numClusteringSamples):
                 # add to proximity list if this event is close
                 proximityList.append(c)
-        
-        numCloseClusters = len(proximityList)
 
-        if numCloseClusters == 0:
+        if len(proximityList) == 0:
             # create a new cluster
             self.clusters.append(Cluster(e))
 
-        elif numCloseClusters == 1:
-            # add event to the cluster
-            proximityList[0].addEvent(e, self.newEventWeight)
         else:
-            # merge clusters in proximityList together
+            # merge clusters in proximityList together if there's more than one
             while len(proximityList)>1:
                 clusterToMerge = proximityList.pop()
-                proximityList[0].mergeClusters(clusterToMerge, self.newEventWeight)
+                proximityList[0].mergeClusters(clusterToMerge)
                 self.clusters.remove(clusterToMerge)
             
             # then add the event to the merged cluster

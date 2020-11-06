@@ -3,7 +3,7 @@ import sys
 
 import pygame
 
-#from PyAedatTools import ArcStar
+from PyAedatTools import ArcStar
 #from PyAedatTools import CornerTracking
 from PyAedatTools import ClusterTracking
 
@@ -24,13 +24,13 @@ def playEventData(eventData, caption="Event Data Playback"):
     speed = 100
 
     # how fast events fade
-    blendRate = 10
+    blendRate = 100
 
     # milliseconds to update frame
     desired_dt = 10
 
     # initialize the surface of active events
-    #SAE = ArcStar.getInitialSAE(xLength, yLength)
+    SAE = ArcStar.getInitialSAE(xLength, yLength)
 
     # initialize pygame
     pygame.init()
@@ -74,7 +74,7 @@ def playEventData(eventData, caption="Event Data Playback"):
 
     # cluster tracking parameters
     maxBufferSize = 1e4
-    newEventWeight = 0.9
+    newEventWeight = 0.1
     clusteringThreshold = 10
     numClusteringSamples = 50
 
@@ -99,32 +99,31 @@ def playEventData(eventData, caption="Event Data Playback"):
                 
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
-                    # update the SAE for the current event
-                    # TODO: wait, were we updating the SAE for on and off events?
-                    #ArcStar.updateSAE(SAE, eventData, i, 1, xLength, yLength)
-
-                    # process event through cluster tracking
-                    clusters.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+                    
 
                     # draw event to screen
                     color = (0,0,0)
                     if polarityArray[i] == 1:
-                        color = (255,255,255)
-                        """
+                        # update the SAE for the current event
+                        ArcStar.updateSAE(SAE, eventData, i, xLength, yLength)
+
                         # use Arc* to determine if the event is a corner
                         # checking circle masks of radius 3 and 4
                         if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3) \
                             and ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 4):
-                            angle = tracker.processCornerEvent(timeStamps[i], xArray[i], yArray[i])
-                            if angle is None:
-                                color = (255,0,0)
-                            else:
-                                color = pygame.Color(0)
-                                color.hsva = (angle*360, 100, 100, 100)
-                                pygame.draw.circle(screen, color, (xLength-xArray[i]-1, yLength-yArray[i]-1), 5)
+
+                            # process event through cluster tracking
+                            clusters.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+                            #angle = tracker.processCornerEvent(timeStamps[i], xArray[i], yArray[i])
+                            #if angle is None:
+                            color = (255,0,0)
+                            #else:
+                            #    color = pygame.Color(0)
+                            #    color.hsva = (angle*360, 100, 100, 100)
+                            #    pygame.draw.circle(screen, color, (xLength-xArray[i]-1, yLength-yArray[i]-1), 5)
                         else:
                             color = (255,255,255)
-                        """
+                        
                     
                     for j in range(3):
                         pixels[ xLength-xArray[i]-1 ][ yLength-yArray[i]-1 ][j] = color[j]
