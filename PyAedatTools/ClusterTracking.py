@@ -75,18 +75,17 @@ class ClusterTracker:
         # create a new event tuple to store in buffer and reference elsewhere
         e = event(x, y, t)
 
-        # if we have a new oldest event timestamp
-        if self.updateEventBuffer(e):
-            for c in self.clusters:
-                # remove old events from clusters
-                if not c.removeOldEvents(self.oldestEventTimestamp):
-                    # if no events left, we don't have a cluster
-                    self.clusters.remove(c)
+        self.updateEventBuffer(e)
 
         proximityList = []
         
-        # TODO: redo using list comprehension
+        # TODO: redo using list comprehension?
         for c in self.clusters:
+            # remove old events from clusters
+            # if no events left, we don't have a cluster
+            if not c.removeOldEvents(self.oldestEventTimestamp):
+                self.clusters.remove(c)
+
             # evaluate cluster proximity
             if c.isCloseToEvent(x, y, self.clusteringThreshold, self.numClusteringSamples):
                 # add to proximity list if this event is close

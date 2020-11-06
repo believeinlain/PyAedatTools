@@ -73,10 +73,10 @@ def playEventData(eventData, caption="Event Data Playback"):
     #tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, minAge, threshold, maxAge)
 
     # cluster tracking parameters
-    maxBufferSize = 1000
-    newEventWeight = 0.5
-    clusteringThreshold = 50
-    numClusteringSamples = 100
+    maxBufferSize = 1e4
+    newEventWeight = 0.9
+    clusteringThreshold = 10
+    numClusteringSamples = 50
 
     # track clusters
     clusters = ClusterTracking.ClusterTracker(maxBufferSize, newEventWeight, clusteringThreshold, numClusteringSamples)
@@ -150,6 +150,10 @@ def playEventData(eventData, caption="Event Data Playback"):
 
                 # update time elapsed
                 sys.stdout.write("\rTime %i" % t)
+                sys.stdout.flush()
+
+                # update events processed
+                sys.stdout.write("\Event %i" % i)
                 sys.stdout.flush()
 
                 # increment frames drawn
