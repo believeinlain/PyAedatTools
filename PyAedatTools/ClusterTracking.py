@@ -21,21 +21,22 @@ class Cluster:
     
     # update centroid weighted average
     def updateCentroid(self, e, eventWeight):
-        self.x = (eventWeight*e.x + (1-eventWeight)*self.x)/2
-        self.y = (eventWeight*e.y + (1-eventWeight)*self.y)/2
+        self.x = int((eventWeight*e.x + (1-eventWeight)*self.x))
+        self.y = int((eventWeight*e.y + (1-eventWeight)*self.y))
 
     # remove events with timestamp <= oldestEventTimestamp
+    # return True iff there are any events left
     def removeOldEvents(self, oldestEventTimestamp):
         for e in self.events:
             if e.t <= oldestEventTimestamp:
                 self.events.remove(e)
             else:
-                return
+                return True if len(self.events)>0 else False
     
     # sample numClusteringSamples from self.events and if any are
     # closer than clusteringThreshold by manhattan distance return True
     def isCloseToEvent(self, x, y, clusteringThreshold, numClusteringSamples):
-        for e in sample(self.events, numClusteringSamples):
+        for e in ( sample(self.events, numClusteringSamples) if len(self.events)>numClusteringSamples else self.events ):
             if ( abs(x - e.x) + abs(y - e.y) ) < clusteringThreshold:
                 return True
         return False
@@ -76,34 +77,39 @@ class ClusterTracker:
 
         # if we have a new oldest event timestamp
         if self.updateEventBuffer(e):
-
-            proximityList = []
-            
-            # TODO: redo using list comprehension
             for c in self.clusters:
                 # remove old events from clusters
-                c.removeOldEvents(self.oldestEventTimestamp)
+                if not c.removeOldEvents(self.oldestEventTimestamp):
+                    # if no events left, we don't have a cluster
+                    self.clusters.remove(c)
 
-                # evaluate cluster proximity
-                if c.isCloseToEvent(x, y, self.clusteringThreshold, self.numClusteringSamples):
-                    # add to proximity list if this event is close
-                    proximityList.append(c)
+        proximityList = []
+        
+        # TODO: redo using list comprehension
+        for c in self.clusters:
+            # evaluate cluster proximity
+            if c.isCloseToEvent(x, y, self.clusteringThreshold, self.numClusteringSamples):
+                # add to proximity list if this event is close
+                proximityList.append(c)
+        
+        numCloseClusters = len(proximityList)
+
+        if numCloseClusters == 0:
+            # create a new cluster
+            self.clusters.append(Cluster(e))
+
+        elif numCloseClusters == 1:
+            # add event to the cluster
+            proximityList[0].addEvent(e, self.newEventWeight)
+        else:
+            # merge clusters in proximityList together
+            while len(proximityList)>1:
+                clusterToMerge = proximityList.pop()
+                proximityList[0].mergeClusters(clusterToMerge, self.newEventWeight)
+                self.clusters.remove(clusterToMerge)
             
-            numCloseClusters = len(proximityList)
-
-            if numCloseClusters == 0:
-                # create a new cluster
-                self.clusters.append(Cluster(e))
-
-            elif numCloseClusters == 1:
-                # add event to the cluster
-                proximityList[0].addEvent(e, self.newEventWeight)
-            else:
-                # merge clusters in proximityList together
-                while len(proximityList)>1:
-                    proximityList[0].mergeClusters(proximityList.pop(), self.newEventWeight)
-                # then add the event to the merged cluster
-                proximityList[0].addEvent(e, self.newEventWeight)
+            # then add the event to the merged cluster
+            proximityList[0].addEvent(e, self.newEventWeight)
     
     # get the centroids for all the clusters
     def getClusterCentroids(self):
