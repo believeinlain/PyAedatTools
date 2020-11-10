@@ -24,6 +24,7 @@ def ImportAedat(aedat):
 
     with open(aedat['importParams']['filePath'], 'rb') as aedat['importParams']['fileHandle']:
         aedat = ImportAedatHeaders.ImportAedatHeaders(aedat)
+        print("Importing aedat version ", aedat['info']['fileFormat'])
         if aedat['info']['fileFormat'] < 3:
             return ImportAedatDataVersion1or2.ImportAedatDataVersion1or2(aedat)
         else:
