@@ -1,9 +1,11 @@
 
-from PyAedatTools import DataTypes
+from collections import namedtuple
+
+point = namedtuple('point', 'x y')
 
 # interpret warnings as errors for debugging
-import warnings
-warnings.filterwarnings('error')
+#import warnings
+#warnings.filterwarnings('error')
 
 # QuadTree divides a 2d array of pixels into subquadrants no larger than minSize
 # when a vertex is added new branches will be added until the size of a quadrant
@@ -19,9 +21,6 @@ class QuadTree:
         self.height = height
         self.center = center
         self.minSize = minSize
-        #print("depth", depth)
-        #print("width", width)
-        #print("minSize", minSize)
     
     # vertex should be a named tuple with fields (t, x, y)
     # recursively adds subquadrants until we've reached minSize
@@ -58,7 +57,7 @@ class QuadTree:
             else:
                 print("Tried to delete vertex in quad that doesn't exist!")
 
-    # traverse quadtree to find all vertices within distance of loc
+    # traverse quadtree to find all vertices within manhattan distance of loc
     def getVerticesWithinDistance(self, loc, dist):
         # initialize results array
         results = []
@@ -67,7 +66,7 @@ class QuadTree:
         # so just return those vertices within distance
         if len(self.vertices) > 0:
             for v in self.vertices:
-                # add vertices within range (taxicab distance)
+                # add vertices within range
                 if ( abs(int(loc.x) - int(v.x)) + abs(int(loc.y) - int(v.y)) ) <= dist:
                     results.append(v)
 
@@ -114,4 +113,4 @@ class QuadTree:
         halfY = int(self.center.y/2)
         offsetX = subX-0.5
         offsetY = subY-0.5
-        return DataTypes.Point(x=self.center.x+offsetX*halfX, y=self.center.y+offsetY*halfY)
+        return point(self.center.x+offsetX*halfX, self.center.y+offsetY*halfY)
