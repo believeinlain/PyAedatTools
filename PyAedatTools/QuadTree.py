@@ -12,14 +12,14 @@ point = namedtuple('point', 'x y')
 # is smaller than minSize
 # the tree can then be traversed to find a verts within range of a query
 class QuadTree:
-    def __init__(self, center, width, height, minSize, depth=0):
+    def __init__(self, width, height, minSize, center=None, depth=0):
         # quadrants are indexed by self.leaf[x][y]
         self.leaf = [[None, None], [None, None]]
         self.vertices = []
         self.depth = depth
         self.width = width
         self.height = height
-        self.center = center
+        self.center = point(int(width/2), int(height/2)) if center is None else center
         self.minSize = minSize
     
     # vertex should be a named tuple with fields (t, x, y)
@@ -34,7 +34,7 @@ class QuadTree:
             # create new subtree if necessary
             if (self.leaf[subX][subY] is None):
                 newCenter = self.getSubQuadrantCenter(subX, subY)
-                self.leaf[subX][subY] = QuadTree(newCenter, int(self.width/2), int(self.height/2), self.minSize, self.depth+1)
+                self.leaf[subX][subY] = QuadTree(int(self.width/2), int(self.height/2), self.minSize, newCenter, self.depth+1)
             # add the vertex to the subtree
             self.leaf[subX][subY].addVertex(vertex)
     

@@ -5,7 +5,8 @@ import pygame
 
 from PyAedatTools import ArcStar
 #from PyAedatTools import CornerTracking
-from PyAedatTools import ClusterTracking
+#from PyAedatTools import ClusterTracking
+from PyAedatTools import FeatureTracking
 
 # playback event data using pygame
 def playEventData(eventData, caption="Event Data Playback"):
@@ -57,7 +58,7 @@ def playEventData(eventData, caption="Event Data Playback"):
     t = 0
 
     # keep track of frames drawn
-    f = 0
+    frames = 0
 
     # corner tracking parameters
     """
@@ -73,13 +74,21 @@ def playEventData(eventData, caption="Event Data Playback"):
     #tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, minAge, threshold, maxAge)
 
     # cluster tracking parameters
+    """
     maxBufferSize = 100
     newEventWeight = 0.9
     clusteringThreshold = 5
     numClusteringSamples = 50
+    """
 
-    # track clusters
-    clusters = ClusterTracking.ClusterTracker(maxBufferSize, newEventWeight, clusteringThreshold, numClusteringSamples)
+    # track features
+    featureTracker = FeatureTracking.FeatureTracker(
+        maxBufferSize=100,
+        trackRange=10,
+        noiseThreshold=3,
+        dimWidth=xLength,
+        dimHeight=yLength
+    )
 
     running = True
     while running:
@@ -112,8 +121,11 @@ def playEventData(eventData, caption="Event Data Playback"):
                         if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3) \
                             and ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 4):
 
+                            # track corner event as feature
+                            featureTracker.processFeature(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+
                             # process event through cluster tracking
-                            clusters.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+                            # clusters.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
                             #angle = tracker.processCornerEvent(timeStamps[i], xArray[i], yArray[i])
                             #if angle is None:
                             color = (255,0,0)
@@ -139,8 +151,9 @@ def playEventData(eventData, caption="Event Data Playback"):
                 clusterDots.fill((0,0,0,0))
 
                 # draw clusters being tracked
-                for (x, y) in clusters.getClusterCentroids():
-                    pygame.draw.circle(clusterDots, (255, 128, 0), (xLength-x-1, yLength-y-1), 2)
+                #for (x, y) in clusters.getClusterCentroids():
+                for f in featureTracker.featureList:
+                    pygame.draw.circle(clusterDots, (255, 128, 0), (xLength-f.x-1, yLength-f.y-1), 2)
 
                 screen.blit(clusterDots, (0,0))
                 
@@ -156,7 +169,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                 sys.stdout.flush()
 
                 # increment frames drawn
-                f = f + 1
+                frames = frames + 1
 
                 # clean old roots
                 #tracker.cleanRoots(t)

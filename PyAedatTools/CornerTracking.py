@@ -17,7 +17,7 @@ from math import pi
 class CornerTracker:
     def __init__(self, width, height, quadTreeRes, trackRange, trackDeltaT, minAge, threshold, maxAge):
         self.vertexTreeRoots = []
-        self.quadTree = QuadTree.QuadTree(DataTypes.Point(int(width/2), int(height/2)), width, height, quadTreeRes)
+        self.quadTree = QuadTree.QuadTree(width, height, quadTreeRes)
         self.trackRange = trackRange
         self.trackDeltaT = trackDeltaT
         self.minAge = minAge
