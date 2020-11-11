@@ -72,8 +72,8 @@ def playEventData(eventData, caption="Event Data Playback"):
 
     # track features
     featureTracker = FeatureTracking.FeatureTracker(
-        maxBufferSize=1000,
-        trackRange=10,
+        maxBufferSize=100,
+        trackRange=5,
         noiseThreshold=3,
         dimWidth=xLength,
         dimHeight=yLength
@@ -151,7 +151,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                 sys.stdout.flush()
 
                 # update events processed
-                sys.stdout.write("\rEvent %i" % i)
+                sys.stdout.write(" - Event %i" % i)
                 sys.stdout.flush()
 
                 # increment frames drawn
