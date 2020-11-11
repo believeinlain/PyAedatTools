@@ -4,8 +4,7 @@ import sys
 import pygame
 
 from PyAedatTools import ArcStar
-#from PyAedatTools import CornerTracking
-#from PyAedatTools import ClusterTracking
+from PyAedatTools import ClusterTracking
 from PyAedatTools import FeatureTracking
 
 # playback event data using pygame
@@ -60,30 +59,17 @@ def playEventData(eventData, caption="Event Data Playback"):
     # keep track of frames drawn
     frames = 0
 
-    # corner tracking parameters
-    """
-    quadRes = 5
-    trackRange = 10
-    trackDeltaT = 200
-    minAge = 100
-    threshold = 200
-    maxAge = 500
-    """
-
-    # track corners
-    #tracker = CornerTracking.CornerTracker(xLength, yLength, quadRes, trackRange, trackDeltaT, minAge, threshold, maxAge)
-
     # cluster tracking parameters
-    """
-    maxBufferSize = 100
-    newEventWeight = 0.9
-    clusteringThreshold = 5
-    numClusteringSamples = 50
-    """
+    clusterTracker = ClusterTracking.ClusterTracker(
+        maxBufferSize=100,
+        newEventWeight=0.9,
+        clusteringThreshold=5,
+        numClusteringSamples=50
+    )
 
     # track features
     featureTracker = FeatureTracking.FeatureTracker(
-        maxBufferSize=100,
+        maxBufferSize=1000,
         trackRange=10,
         noiseThreshold=3,
         dimWidth=xLength,
@@ -125,14 +111,9 @@ def playEventData(eventData, caption="Event Data Playback"):
                             featureTracker.processFeature(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
 
                             # process event through cluster tracking
-                            # clusters.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
-                            #angle = tracker.processCornerEvent(timeStamps[i], xArray[i], yArray[i])
-                            #if angle is None:
+                            clusterTracker.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+
                             color = (255,0,0)
-                            #else:
-                            #    color = pygame.Color(0)
-                            #    color.hsva = (angle*360, 100, 100, 100)
-                            #    pygame.draw.circle(screen, color, (xLength-xArray[i]-1, yLength-yArray[i]-1), 5)
                         else:
                             color = (255,255,255)
                         
@@ -151,9 +132,11 @@ def playEventData(eventData, caption="Event Data Playback"):
                 clusterDots.fill((0,0,0,0))
 
                 # draw clusters being tracked
-                #for (x, y) in clusters.getClusterCentroids():
+                for (x, y) in clusterTracker.getClusterCentroids():
+                    pygame.draw.circle(clusterDots, (255, 255, 0), (xLength-x-1, yLength-y-1), 1)
+
                 for f in featureTracker.featureList:
-                    pygame.draw.circle(clusterDots, (255, 128, 0), (xLength-f.x-1, yLength-f.y-1), 2)
+                    pygame.draw.circle(clusterDots, (255, 0, 0), (xLength-f.x-1, yLength-f.y-1), 3)
 
                 screen.blit(clusterDots, (0,0))
                 
@@ -170,8 +153,5 @@ def playEventData(eventData, caption="Event Data Playback"):
 
                 # increment frames drawn
                 frames = frames + 1
-
-                # clean old roots
-                #tracker.cleanRoots(t)
 
     pygame.quit()
