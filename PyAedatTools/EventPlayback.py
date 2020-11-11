@@ -1,6 +1,9 @@
 
 import sys
 
+# ignore spurious pygame-related errors
+# pylint: disable=no-member
+# pylint: disable=too-many-function-args
 import pygame
 
 from PyAedatTools import ArcStar
@@ -148,7 +151,7 @@ def playEventData(eventData, caption="Event Data Playback"):
                 sys.stdout.flush()
 
                 # update events processed
-                sys.stdout.write("\Event %i" % i)
+                sys.stdout.write("\rEvent %i" % i)
                 sys.stdout.flush()
 
                 # increment frames drawn
