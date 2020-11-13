@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Example script for how to invoke the ImportAedat function
-"""
 
 import sys
 import numpy as np
@@ -16,10 +12,7 @@ aedat['importParams'] = {}
 
 filename = "3.aedat"
 
-# aedat['importParams']['filePath'] = '/home/steph/aedata/Pedestrian Detection/Raw pedestrian data/'+filename
 aedat['importParams']['filePath'] = "./example_data/"+filename
-# aedat['importParams']['fileFormat'] = 'DAVIS'
-#aedat['importParams']['endEvent'] = 1e6
 
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
@@ -34,5 +27,25 @@ eventData = {
     'numEvents': polarityData['numEvents']
 }
 
+width = 350
+height = 265
+
+featureTrackingArgs = {
+    'enable':False,
+    'maxBufferSize':100,
+    'trackRange':5,
+    'noiseThreshold':3,
+    'dimWidth':width,
+    'dimHeight':height
+}
+
+clusterTrackingArgs = {
+    'enable':False,
+    'maxBufferSize':100,
+    'newEventWeight':0.9,
+    'clusteringThreshold':5,
+    'numClusteringSamples':50
+}
+
 # playback the event data
-EventPlayback.playEventData(eventData, filename)
+EventPlayback.playEventData(eventData, (width, height), filename, featureTrackingArgs, clusterTrackingArgs)

@@ -103,10 +103,6 @@ class ClusterTracker:
             # then add the event to the merged cluster
             proximityList[0].addEvent(e, self.newEventWeight)
     
-    # get the centroids for all the clusters
-    def getClusterCentroids(self):
-        return [(c.x, c.y) for c in self.clusters]
-    
     # add a new event to the buffer and update the oldestEventTimestamp
     # return True iff self.oldestEventTimestamp was updated
     def updateEventBuffer(self, e):

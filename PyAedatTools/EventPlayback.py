@@ -11,7 +11,7 @@ from PyAedatTools import ClusterTracking
 from PyAedatTools import FeatureTracking
 
 # playback event data using pygame
-def playEventData(eventData, caption="Event Data Playback"):
+def playEventData(eventData, dim, caption="Event Data Playback", featureTrackingArgs={}, clusterTrackingArgs={}):
 
     # read event data
     timeStamps = eventData['timeStamp'] # should be in ms
@@ -19,9 +19,9 @@ def playEventData(eventData, caption="Event Data Playback"):
     yArray = eventData['y']
     polarityArray = eventData['polarity']
 
-    # pick an arbitrary x and y length
-    xLength = 350
-    yLength = 265
+    # get width and height from input
+    xLength = dim[0]
+    yLength = dim[1]
 
     # speed to playback events
     speed = 100
@@ -50,8 +50,8 @@ def playEventData(eventData, caption="Event Data Playback"):
     events.fill((127,127,127,255))
     fade = pygame.Surface((xLength, yLength), pygame.SRCALPHA)
     fade.fill((127,127,127,blendRate))
-    clusterDots = pygame.Surface((xLength, yLength), pygame.SRCALPHA)
-    clusterDots.fill((0,0,0,0))
+    overlay = pygame.Surface((xLength, yLength), pygame.SRCALPHA)
+    overlay.fill((0,0,0,0))
 
     # keep track of events displayed
     i = 0
@@ -62,22 +62,17 @@ def playEventData(eventData, caption="Event Data Playback"):
     # keep track of frames drawn
     frames = 0
 
-    # cluster tracking parameters
-    clusterTracker = ClusterTracking.ClusterTracker(
-        maxBufferSize=100,
-        newEventWeight=0.9,
-        clusteringThreshold=5,
-        numClusteringSamples=50
-    )
+    # track clusters (unpacking arg dictionary w/o enable argument)
+    if clusterTrackingArgs['enable']:
+        argsToPass = clusterTrackingArgs.copy()
+        argsToPass.pop('enable')
+        clusterTracker = ClusterTracking.ClusterTracker(**argsToPass)
 
-    # track features
-    featureTracker = FeatureTracking.FeatureTracker(
-        maxBufferSize=100,
-        trackRange=5,
-        noiseThreshold=3,
-        dimWidth=xLength,
-        dimHeight=yLength
-    )
+    # track features (unpacking arg dictionary w/o enable argument)
+    if featureTrackingArgs['enable']:
+        argsToPass = featureTrackingArgs.copy()
+        argsToPass.pop('enable')
+        featureTracker = FeatureTracking.FeatureTracker(**argsToPass)
 
     running = True
     while running:
@@ -97,7 +92,6 @@ def playEventData(eventData, caption="Event Data Playback"):
                 
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] and (timeStamps[0]+speed*t) > timeStamps[i]:
-                    
 
                     # draw event to screen
                     color = (0,0,0)
@@ -111,10 +105,12 @@ def playEventData(eventData, caption="Event Data Playback"):
                             and ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 4):
 
                             # track corner event as feature
-                            featureTracker.processFeature(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+                            if featureTrackingArgs['enable']:
+                                featureTracker.processFeature(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
 
                             # process event through cluster tracking
-                            clusterTracker.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
+                            if clusterTrackingArgs['enable']:
+                                clusterTracker.processEvent(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))
 
                             color = (255,0,0)
                         else:
@@ -132,16 +128,19 @@ def playEventData(eventData, caption="Event Data Playback"):
                 screen.fill((0,0,0,255))
                 screen.blit(events, (0,0))
 
-                clusterDots.fill((0,0,0,0))
+                overlay.fill((0,0,0,0))
 
                 # draw clusters being tracked
-                for (x, y) in clusterTracker.getClusterCentroids():
-                    pygame.draw.circle(clusterDots, (255, 255, 0), (xLength-x-1, yLength-y-1), 1)
+                if clusterTrackingArgs['enable']:
+                    for c in clusterTracker.clusters:
+                        pygame.draw.circle(overlay, (255, 255, 0), (xLength-c.x-1, yLength-c.y-1), 1)
 
-                for f in featureTracker.featureList:
-                    pygame.draw.circle(clusterDots, (255, 0, 0), (xLength-f.x-1, yLength-f.y-1), 3)
+                # draw features being tracked
+                if featureTrackingArgs['enable']:
+                    for f in featureTracker.featureList:
+                        pygame.draw.circle(overlay, (255, 0, 0), (xLength-f.x-1, yLength-f.y-1), 3)
 
-                screen.blit(clusterDots, (0,0))
+                screen.blit(overlay, (0,0))
                 
                 # update the display
                 pygame.display.update()
