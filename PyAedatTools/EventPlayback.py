@@ -27,10 +27,10 @@ def playEventData(eventData, dim, caption="Event Data Playback", featureTracking
     speed = 100
 
     # how fast events fade
-    blendRate = 100
+    blendRate = 10
 
     # milliseconds to update frame
-    desired_dt = 10
+    desired_dt = 30
 
     # initialize the surface of active events
     SAE = ArcStar.getInitialSAE(xLength, yLength)

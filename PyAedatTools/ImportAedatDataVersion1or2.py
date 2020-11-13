@@ -227,7 +227,9 @@ def ImportAedatDataVersion1or2(aedat):
         ImuOrPolarityLogical = ImuOrPolarityLogical.astype(bool)
         frameLogical = np.logical_and(apsOrImuLogical,
                                      np.logical_not(ImuOrPolarityLogical))
-       # Frame events
+        # Frame events
+        # TODO: make this an option to import this or not
+        """
         if ('dataTypes' not in importParams or 'frame' in importParams['dataTypes']) \
                 and any(frameLogical):
             print('Processing frames ...')
@@ -379,6 +381,7 @@ def ImportAedatDataVersion1or2(aedat):
                     = outputData['frame']['samples'][0 : frameCount]
                 del outputData['frame']['reset']   # reset is no longer needed
         del frameLogical
+        """
 
 
         # IMU events
