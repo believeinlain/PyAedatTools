@@ -10,7 +10,8 @@ aedat['importParams'] = {}
 
 # Put the filename, including full path, in the 'filePath' field.
 
-filename = "Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
+#filename = "Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
+filename = "Davis346red-2020-06-26T12-26-42-0700-00000195-0_Test_2.aedat"
 
 aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
 
@@ -30,13 +31,19 @@ eventData = {
 width = 350
 height = 265
 
+cornerTrackingArgs = {
+    'passArray': [
+        {'radius':3,'arcMin':2,'arcMax':4},
+        {'radius':5,'arcMin':3,'arcMax':5}
+    ],
+    'SAEThreshold':30
+}
+
 featureTrackingArgs = {
     'enable':True,
-    'maxBufferSize':1000,
+    'maxBufferSize':10000,
     'trackRange':10,
-    'noiseThreshold':5,
-    'dimWidth':width,
-    'dimHeight':height
+    'noiseThreshold':3
 }
 
 clusterTrackingArgs = {
@@ -48,4 +55,4 @@ clusterTrackingArgs = {
 }
 
 # playback the event data
-EventPlayback.playEventData(eventData, (width, height), filename, featureTrackingArgs, clusterTrackingArgs)
+EventPlayback.playEventData(eventData, (width, height), filename, featureTrackingArgs, clusterTrackingArgs, cornerTrackingArgs)

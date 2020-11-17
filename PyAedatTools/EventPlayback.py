@@ -11,7 +11,35 @@ from PyAedatTools import ClusterTracking
 from PyAedatTools import FeatureTracking
 
 # playback event data using pygame
-def playEventData(eventData, dim, caption="Event Data Playback", featureTrackingArgs={}, clusterTrackingArgs={}):
+def playEventData(
+    eventData, 
+    dim, 
+    caption = "Event Playback", 
+    featureTrackingArgs = {
+        'enable':True,
+        'maxBufferSize':1000,
+        'trackRange':5,
+        'noiseThreshold':4
+    }, 
+    clusterTrackingArgs = {
+        'enable':False,
+        'maxBufferSize':100,
+        'newEventWeight':0.9,
+        'clusteringThreshold':5,
+        'numClusteringSamples':50
+    }, 
+    cornerTrackingArgs = {
+        # for a corner to be counted it has to count for all passes
+        'passArray': [
+            {'radius':3,'arcMin':3,'arcMax':6},
+            {'radius':4,'arcMin':4,'arcMax':8}
+        ],
+        'SAEThreshold':50
+    }
+    ):
+
+    featureTrackingArgs['dimWidth'] = dim[0]
+    featureTrackingArgs['dimHeight'] = dim[1]
 
     # read event data
     timeStamps = eventData['timeStamp'] # should be in ms
@@ -97,13 +125,16 @@ def playEventData(eventData, dim, caption="Event Data Playback", featureTracking
                     color = (0,0,0)
                     if polarityArray[i] == 1:
                         # update the SAE for the current event
-                        ArcStar.updateSAE(SAE, eventData, i, xLength, yLength)
+                        ArcStar.updateSAE(SAE, eventData, i, xLength, yLength, cornerTrackingArgs['SAEThreshold'])
 
                         # use Arc* to determine if the event is a corner
-                        # checking circle masks of radius 3 and 4
-                        if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 3) \
-                            and ArcStar.isEventCorner(SAE, xArray[i], yArray[i], 4):
-
+                        # checking circle masks from the pass array in cornerTrackingArgs
+                        eventIsCorner = False
+                        for p in cornerTrackingArgs['passArray']:
+                            if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], p):
+                                eventIsCorner = True
+                        
+                        if eventIsCorner:
                             # track corner event as feature
                             if featureTrackingArgs['enable']:
                                 featureTracker.processFeature(int(xArray[i]), int(yArray[i]), int(timeStamps[i]))

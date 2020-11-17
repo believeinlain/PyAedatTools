@@ -55,8 +55,13 @@ class FeatureTracker:
             self.featureList[self.featureList.index(longestTracked)] = f
 
             # remove the other nearby features
+            # TODO: sometimes feature not in list? debug later
             for fi in trackedFeatures:
-                self.featureList.remove(fi)
+                try:
+                    self.featureList.remove(fi)
+                except:
+                    print("Error: Feature could not be removed, not in list.")
+                
         
         for f in self.featureList:
             # remove features if they are too old

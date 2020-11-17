@@ -60,10 +60,11 @@ def updateSAE(SAE, eventData, i, width, height, k=50):
     SAE[x][y] = (SAE[x][y][0], t)
 
 # determine if a new event is a corner
-def isEventCorner(SAE, eX, eY, circleRadius=3):
+def isEventCorner(SAE, eX, eY, passArgs={'radius':3,'arcMin':3,'arcMax':6}):
     # min and max arclengths to detect a corner
-    Lmin = circleRadius
-    Lmax = 2*circleRadius
+    Lmin = passArgs['arcMin']
+    Lmax = passArgs['arcMax']
+    circleRadius = passArgs['radius']
 
     # choose the right circleMask
     if circleRadius == 3:
@@ -79,10 +80,15 @@ def isEventCorner(SAE, eX, eY, circleRadius=3):
 
     # get circle coordinates within bounds of SAE
     Circle = [(eX+m[0], eY+m[1]) for m in circleMask if \
-        eX+m[0]>=0 and eX+m[0]<=width and eY+m[1]>=0 and eY+m[1]<=height]
+        eX+m[0]>=0 and eX+m[0]<width and eY+m[1]>=0 and eY+m[1]<height]
 
     # Initialize Anew to the newest event on the circle (by tr)
-    newestIndex = max({getAgeOfCircleElement(SAE, Circle[i]):i for i in range(len(Circle))}.items())[1]
+    try:
+        newestIndex = max({getAgeOfCircleElement(SAE, Circle[i]):i for i in range(len(Circle))}.items())[1]
+    except:
+        print("something wrong with the circle!")
+        print(Circle)
+        newestIndex = 0
     
     Anew = [newestIndex]
     AnewOldestElement = newestIndex
