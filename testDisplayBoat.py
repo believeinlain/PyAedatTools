@@ -33,15 +33,15 @@ height = 265
 
 cornerTrackingArgs = {
     'passArray': [
-        {'radius':3,'arcMin':2,'arcMax':4},
-        {'radius':5,'arcMin':3,'arcMax':5}
+        {'radius':3,'arcMin':3,'arcMax':5},
+        {'radius':4,'arcMin':4,'arcMax':5}
     ],
-    'SAEThreshold':30
+    'SAEThreshold':50
 }
 
 featureTrackingArgs = {
     'enable':True,
-    'maxBufferSize':10000,
+    'maxBufferSize':1000,
     'trackRange':10,
     'noiseThreshold':3
 }

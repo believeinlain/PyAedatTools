@@ -6,6 +6,7 @@ import sys
 # pylint: disable=too-many-function-args
 import pygame
 
+from PyAedatTools import AttentionPriorityMap
 from PyAedatTools import ArcStar
 from PyAedatTools import ClusterTracking
 from PyAedatTools import FeatureTracking
@@ -62,6 +63,11 @@ def playEventData(
 
     # initialize the surface of active events
     SAE = ArcStar.getInitialSAE(xLength, yLength)
+
+    # initialize the APM
+    APMRadius = 10
+    attentionThreshold = 0.05 # must be less than this intensity to care about
+    APM = AttentionPriorityMap.AttentionPriorityMap(xLength, yLength, APMRadius)
 
     # initialize pygame
     pygame.init()
@@ -127,12 +133,17 @@ def playEventData(
                         # update the SAE for the current event
                         ArcStar.updateSAE(SAE, eventData, i, xLength, yLength, cornerTrackingArgs['SAEThreshold'])
 
+                        # update the APM (only for on events)
+                        APM.processEvent(xArray[i], yArray[i], timeStamps[i])
+
                         # use Arc* to determine if the event is a corner
                         # checking circle masks from the pass array in cornerTrackingArgs
                         eventIsCorner = False
-                        for p in cornerTrackingArgs['passArray']:
-                            if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], p):
-                                eventIsCorner = True
+                        # only care about events based on attention threshold
+                        if APM.getNormalizedIntensity(xArray[i], yArray[i]) < attentionThreshold:
+                            for p in cornerTrackingArgs['passArray']:
+                                if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], p):
+                                    eventIsCorner = True
                         
                         if eventIsCorner:
                             # track corner event as feature
@@ -146,10 +157,11 @@ def playEventData(
                             color = (255,0,0)
                         else:
                             color = (255,255,255)
-                        
-                    
-                    for j in range(3):
-                        pixels[ xLength-xArray[i]-1 ][ yLength-yArray[i]-1 ][j] = color[j]
+
+                    # only draw on events 
+                    if polarityArray[i] == 1:
+                        for j in range(3):
+                            pixels[ xLength-xArray[i]-1 ][ yLength-yArray[i]-1 ][j] = color[j]
 
                     # increment events added
                     i = i + 1
