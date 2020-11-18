@@ -31,8 +31,10 @@ eventData = {
 eventPlaybackArgs = {
     'caption': filename,
     'maxBufferSize': 10000,
+    'APMEnable': False,
+    'APMSampleFraction': 0.2,
     'APMRadius': 5,
-    'attentionThreshold': 0.1,
+    'attentionThreshold': 0.05,
     'width': 350,
     'height': 265,
     'filename': filename,
@@ -50,7 +52,7 @@ cornerTrackingArgs = {
 }
 
 featureTrackingArgs = {
-    'enable':True,
+    'enable':False,
     'maxBufferSize':1000,
     'trackRange':10,
     'noiseThreshold':3

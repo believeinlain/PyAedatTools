@@ -144,14 +144,14 @@ def playEventData(
 
                         # update the APM (only for on events)
                         # randomly sample a fraction of events
-                        if random() < 0.5:
+                        if eventPlaybackArgs['APMEnable'] and random() < eventPlaybackArgs['APMSampleFraction']:
                             APM.processEvent(newEvent)
 
                         # use Arc* to determine if the event is a corner
                         # checking circle masks from the pass array in cornerTrackingArgs
                         eventIsCorner = False
                         # only care about events based on attention threshold
-                        if APM.getNormalizedIntensity(xArray[i], yArray[i]) < attentionThreshold:
+                        if APM.getNormalizedIntensity(xArray[i], yArray[i]) < attentionThreshold or not eventPlaybackArgs['APMEnable']:
                             for p in cornerTrackingArgs['passArray']:
                                 if ArcStar.isEventCorner(SAE, xArray[i], yArray[i], p):
                                     eventIsCorner = True
