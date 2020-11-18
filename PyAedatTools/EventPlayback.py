@@ -6,16 +6,18 @@ import sys
 # pylint: disable=too-many-function-args
 import pygame
 
+from random import random
+
 from PyAedatTools import AttentionPriorityMap
 from PyAedatTools import ArcStar
 from PyAedatTools import ClusterTracking
 from PyAedatTools import FeatureTracking
+from PyAedatTools import EventBuffer
 
 # playback event data using pygame
 def playEventData(
     eventData, 
-    dim, 
-    caption = "Event Playback", 
+    eventPlaybackArgs, 
     featureTrackingArgs = {
         'enable':True,
         'maxBufferSize':1000,
@@ -39,8 +41,11 @@ def playEventData(
     }
     ):
 
-    featureTrackingArgs['dimWidth'] = dim[0]
-    featureTrackingArgs['dimHeight'] = dim[1]
+    width = eventPlaybackArgs['width']
+    height = eventPlaybackArgs['height']
+
+    featureTrackingArgs['dimWidth'] = width
+    featureTrackingArgs['dimHeight'] = height
 
     # read event data
     timeStamps = eventData['timeStamp'] # should be in ms
@@ -49,30 +54,30 @@ def playEventData(
     polarityArray = eventData['polarity']
 
     # get width and height from input
-    xLength = dim[0]
-    yLength = dim[1]
+    xLength = width
+    yLength = height
 
     # speed to playback events
-    speed = 100
+    speed = eventPlaybackArgs['playbackSpeed']
 
     # how fast events fade
-    blendRate = 10
+    blendRate = eventPlaybackArgs['blendRate']
 
     # milliseconds to update frame
-    desired_dt = 30
+    desired_dt = eventPlaybackArgs['frameStep']
 
     # initialize the surface of active events
     SAE = ArcStar.getInitialSAE(xLength, yLength)
 
     # initialize the APM
-    APMRadius = 10
-    attentionThreshold = 0.05 # must be less than this intensity to care about
-    APM = AttentionPriorityMap.AttentionPriorityMap(xLength, yLength, APMRadius)
+    eventBuffer = EventBuffer.EventBuffer(eventPlaybackArgs['maxBufferSize'])
+    attentionThreshold = eventPlaybackArgs['attentionThreshold'] # must be less than this intensity to care about
+    APM = AttentionPriorityMap.AttentionPriorityMap(width, height, eventPlaybackArgs['APMRadius'], eventBuffer)
 
     # initialize pygame
     pygame.init()
 
-    pygame.display.set_caption(caption)
+    pygame.display.set_caption(eventPlaybackArgs['caption'])
 
     # update every set time
     UPDATE = pygame.USEREVENT+1
@@ -133,8 +138,14 @@ def playEventData(
                         # update the SAE for the current event
                         ArcStar.updateSAE(SAE, eventData, i, xLength, yLength, cornerTrackingArgs['SAEThreshold'])
 
+                        # create a new event tuple and update event buffer
+                        newEvent = EventBuffer.event(xArray[i], yArray[i], timeStamps[i])
+                        eventBuffer.update(newEvent)
+
                         # update the APM (only for on events)
-                        APM.processEvent(xArray[i], yArray[i], timeStamps[i])
+                        # randomly sample a fraction of events
+                        if random() < 0.5:
+                            APM.processEvent(newEvent)
 
                         # use Arc* to determine if the event is a corner
                         # checking circle masks from the pass array in cornerTrackingArgs
@@ -158,10 +169,8 @@ def playEventData(
                         else:
                             color = (255,255,255)
 
-                    # only draw on events 
-                    if polarityArray[i] == 1:
-                        for j in range(3):
-                            pixels[ xLength-xArray[i]-1 ][ yLength-yArray[i]-1 ][j] = color[j]
+                    for j in range(3):
+                        pixels[ xLength-xArray[i]-1 ][ yLength-yArray[i]-1 ][j] = color[j]
 
                     # increment events added
                     i = i + 1

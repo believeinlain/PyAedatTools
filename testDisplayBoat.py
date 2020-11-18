@@ -28,8 +28,18 @@ eventData = {
     'numEvents': polarityData['numEvents']
 }
 
-width = 350
-height = 265
+eventPlaybackArgs = {
+    'caption': filename,
+    'maxBufferSize': 10000,
+    'APMRadius': 5,
+    'attentionThreshold': 0.1,
+    'width': 350,
+    'height': 265,
+    'filename': filename,
+    'playbackSpeed': 100,
+    'blendRate': 10,
+    'frameStep': 30
+}
 
 cornerTrackingArgs = {
     'passArray': [
@@ -55,4 +65,4 @@ clusterTrackingArgs = {
 }
 
 # playback the event data
-EventPlayback.playEventData(eventData, (width, height), filename, featureTrackingArgs, clusterTrackingArgs, cornerTrackingArgs)
+EventPlayback.playEventData(eventData, eventPlaybackArgs, featureTrackingArgs, clusterTrackingArgs, cornerTrackingArgs)
