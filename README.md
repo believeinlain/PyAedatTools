@@ -18,6 +18,9 @@ The corner detection was accomplished using the Arc* algorithm described in refe
 ![Surface of Active Events](/images/SAE.png)  
 Illustration of the Surface of Active Events (SAE) from reference [1]. The blue line represents the most recent event at each location, while the red line represents the surface with noise filtering.
 
+![ArcStar](/images/ArcStar.png)
+Illustration of the Arc* algorithm operating on an event from reference [1]. This image illustrates how the algorithm can detect both inside and outside corners.
+
 ## Outstanding issues
 
 Import from aedat2 currently doesn't have a good method for excluding data before any timestamp resets.
