@@ -35,7 +35,16 @@ Feature tracking is performed as described in reference [3] using corners identi
 ![Feature Tracking](/images/FeatureTracking.png)  
 Screenshot from running [testFeatureTracking.py](https://github.com/believeinlain/PyAedatTools/blob/master/testFeatureTracking.py), with corners displayed as red pixels and tracked features displayed as red circles. Data shown was captured from a boat at sea using a Davis346red DVS camera.
 
-While the feature tracking algorithm successfully tracks the sailboat, it also tracks nearly all of the waves in the image.
+While the feature tracking algorithm successfully tracks the sailboat, it also tracks nearly all of the waves in the image. Because of this, the feature tracking approach is not well-suited to tackling our specific challenges, although it may be used as part of a wider approach, as it was in reference [3].
+
+## Attention Priority Map
+
+In reference [3], they used what they call an Attention Priority Map (or APM) to identify regions with a higher concentration of events in order to focus on moving objects against a static background. In our case, we want to focus on moving objects against a dynamic background, so the APM was adapted to instead focus on areas with a lower concentration of events, since the dynamic background contains the highest event density.
+
+![APM](/images/APM.png)  
+Screenshot from running [testAPM.py](https://github.com/believeinlain/PyAedatTools/blob/master/testAPM.py), where regions with a high concentration of events are ignored for corner detection and subsequent feature tracking.
+
+This approach was only marginally successful, as much of the dynamic background had the exact same event density as the objects to be tracked, so while the APM does reduce the amount of computing power spent on corner and feature tracking, it is not sufficent to filter out the dynamic background.
 
 # References
 
