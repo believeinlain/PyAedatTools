@@ -30,10 +30,12 @@ This approach was found to be quite effective at finding corners on a variety of
 
 ## Feature Tracking
 
-Feature tracking is performed as described in reference [3] using corners identified by the Arc* algorithm. This functionality is contained in the [FeatureTracking](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/FeatureTracking.py) module.
+Feature tracking is performed as described in reference [3] using corners identified by the Arc* algorithm. This functionality is contained in the [FeatureTracking](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/FeatureTracking.py) module. The feature tracking algorithm tracks corners over time and identifies them as features if they are close to previously tracked features. **maxBufferSize** determines the size of the buffer used to keep track of features. When the feature buffer is full, features older than the oldest feature in the buffer are removed, resulting in a dynamic time window to reduce motion blur. **trackRange** determines how close a feature must be to a corner to maintiain it, as well as determining how close features can get before merging. **noiseThreshold** is the minimum number of previous features within **trackRange** of a feature that must be in the buffer in order to begin tracking that feature. This prevents sparse corners from being tracked as features and filters out noise.
 
 ![Feature Tracking](/images/FeatureTracking.png)  
-Screenshot from running [testFeatureTracking.py](https://github.com/believeinlain/PyAedatTools/blob/master/testFeatureTracking.py),
+Screenshot from running [testFeatureTracking.py](https://github.com/believeinlain/PyAedatTools/blob/master/testFeatureTracking.py), with corners displayed as red pixels and tracked features displayed as red circles. Data shown was captured from a boat at sea using a Davis346red DVS camera.
+
+While the feature tracking algorithm successfully tracks the sailboat, it also tracks nearly all of the waves in the image.
 
 # References
 
