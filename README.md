@@ -15,8 +15,8 @@ The central module for displaying and processing data is the [EventPlayback](htt
 
 The corner detection was accomplished using the Arc* algorithm described in reference [1]. This functionality is contained in the [ArcStar](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/ArcStar.py) module. To summarize, the Arc* algorithm processes each event into a "Surface of Active Events" or SAE. This surface is a 2D array that maps onto the input pixels. Each pixel contains a timestamp corresponding to its "height" on the SAE (**tr**) and the timestamp of the most recent event at this location (**tl**). **tr** will only be updated if a new event occurs more than **k** milliseconds after the last time it was updated, which serves to reduce noise. An event is then considered a corner if the contour of the SAE around it falls in an arc of length between **arcMin** and **arcMax** with radius **radius**. These parameters can be set in the **cornerTrackingArgs** argument to the EventPlayback.playEventData() function. **SAEThreshold** sets the value of **k**, and each event will be run through the Arc* algorithm once for each pass in **passArray**, and will only be considered a corner if it is considered a corner in all passes.
 
-<p align="center">![Surface of Active Events](/images/SAE.png)</p>
-<p align="center">Illustration of the Surface of Active Events (SAE) from reference [1]. The blue line represents the most recent event at each location, while the red line represents the surface with noise filtering.</p>
+![Surface of Active Events](/images/SAE.png)  
+Illustration of the Surface of Active Events (SAE) from reference [1]. The blue line represents the most recent event at each location, while the red line represents the surface with noise filtering.
 
 ## Outstanding issues
 
