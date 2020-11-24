@@ -28,16 +28,17 @@ Screenshot from running [testDisplayPedestrian.py](https://github.com/believeinl
 
 This approach was found to be quite effective at finding corners on a variety of datasets, however we still need to find a means of discriminating between corners from noise, corners from objects, and corners from dynamic scenery. Also, this approach is somewhat expensive in its current implementation, and although it could stand to be optimized somewhat, it may also be replaced by a less accurate but faster algorithm.
 
-## Outstanding issues
+## Feature Tracking
 
-Import from aedat2 currently doesn't have a good method for excluding data before any timestamp resets.
+Feature tracking is performed as described in reference [3] using corners identified by the Arc* algorithm. This functionality is contained in the [FeatureTracking](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/FeatureTracking.py) module.
 
-ExportAedat2 supports polarity, frames and imu6; it doesn't put xml metadata back into the file header.
-
-In addition, much of the code has not been tested and does not have the correct syntax for Python 3.
+![Feature Tracking](/images/FeatureTracking.png)  
+Screenshot from running [testFeatureTracking.py](https://github.com/believeinlain/PyAedatTools/blob/master/testFeatureTracking.py),
 
 # References
 
-[1] Ignacio Alzugaray and Margarita Chli, <em>Asynchronous Corner Detection and Tracking for Event Cameras in Real-Time</em>
+[1] Ignacio Alzugaray and Margarita Chli. <em>Asynchronous Corner Detection and Tracking for Event Cameras in Real-Time</em>
 
-[2] Shu Miao, Guang Chen, Xiangyu Ning, Yang Zi, Kejia Ren, Zhenshan Bing and Alois Knoll, <em>Neuromorphic Vision Datasets for Pedestrian Detection, Action Recognition, and Fall Detection</em>
+[2] Shu Miao, Guang Chen, Xiangyu Ning, Yang Zi, Kejia Ren, Zhenshan Bing and Alois Knoll. <em>Neuromorphic Vision Datasets for Pedestrian Detection, Action Recognition, and Fall Detection</em>
+
+[3] J.P. Rodr´ıguez-G´omez, A. G´omez Egu´ıluz, J.R. Mart´ınez-de Dios and A. Ollero. <em>Asynchronous event-based clustering and tracking for intrusion monitoring in UAS</em>
