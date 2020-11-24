@@ -18,8 +18,11 @@ The corner detection was accomplished using the Arc* algorithm described in refe
 ![Surface of Active Events](/images/SAE.png)  
 Illustration of the Surface of Active Events (SAE) from reference [1]. The blue line represents the most recent event at each location, while the red line represents the surface with noise filtering.
 
-![ArcStar](/images/ArcStar.png)
+![ArcStar](/images/ArcStar.png)  
 Illustration of the Arc* algorithm operating on an event from reference [1]. This image illustrates how the algorithm can detect both inside and outside corners.
+
+![ArcStar Implementation](/images/ArcStar_implementation.png)  
+Screenshot from running [testDisplayPedestrian.py](https://github.com/believeinlain/PyAedatTools/blob/master/testDisplayPedestrian.py), which performs corner detection on pedestrian data from reference [2] using recommended Arc* parameters from reference [1] on an SAE constructed from 'on' events (shown in white). The detected corners are shown in red, and the 'off' events are shown in black.
 
 ## Outstanding issues
 
@@ -32,3 +35,5 @@ In addition, much of the code has not been tested and does not have the correct 
 # References
 
 [1] Ignacio Alzugaray and Margarita Chli, <em>Asynchronous Corner Detection and Tracking for Event Cameras in Real-Time</em>
+
+[2] Shu Miao, Guang Chen, Xiangyu Ning, Yang Zi, Kejia Ren, Zhenshan Bing and Alois Knoll, <em>Neuromorphic Vision Datasets for Pedestrian Detection, Action Recognition, and Fall Detection</em>
