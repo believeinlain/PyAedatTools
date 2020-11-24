@@ -16,3 +16,7 @@ Import from aedat2 currently doesn't have a good method for excluding data befor
 ExportAedat2 supports polarity, frames and imu6; it doesn't put xml metadata back into the file header.
 
 In addition, much of the code has not been tested and does not have the correct syntax for Python 3.
+
+## References
+
+[1] Ignacio Alzugaray and Margarita Chli, <em>Asynchronous Corner Detection and Tracking for Event Cameras in Real-Time</em>
