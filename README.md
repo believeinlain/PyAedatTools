@@ -3,7 +3,7 @@ Tools for manipulating .aedat files (timestamped address-event data from neuromo
 
 The code for importing aedat files into numpy arrays was borrowed from [simbamford's branch](https://github.com/simbamford/AedatTools), so the readme there will have more details about that particular functionality.
 
-The focus of this repo has been to implement asynchronous optical flow using various algorithms, with the end goal of tracking objects against noisy dynamic backgrounds such as the sea or trees in wind.
+The focus of this repo has been to implement asynchronous tracking and segmentation using various algorithms, with the end goal of tracking objects against noisy dynamic backgrounds such as the sea or trees in wind.
 
 ## EventPlayback
 
