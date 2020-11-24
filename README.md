@@ -7,7 +7,9 @@ The focus of this repo has been to implement asynchronous tracking and segmentat
 
 ## EventPlayback
 
-The central module for displaying and processing data is the [EventPlayback](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/EventPlayback.py) module which takes eventData in the form of a dict composed of numpy arrays (as returned by the [ImportAedat](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/ImportAedat.py) function, along with a number of dicts containing parameters for the tracking and data segmentation algorithms that have been implemented so far.
+The central module for displaying and processing data is the [EventPlayback](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/EventPlayback.py) module which takes **eventData** in the form of a dict composed of numpy arrays (as returned by the [ImportAedat](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/ImportAedat.py) function, along with a number of dicts containing parameters for the tracking and data segmentation algorithms that have been implemented so far.
+
+The events in **eventData** are processed asynchronously, and the results are cached into frames every **frameStep** milliseconds, in order to avoid updating the display too frequently. The results are displayed using pygame.
 
 # Algorithms
 
@@ -23,6 +25,8 @@ Illustration of the Arc* algorithm operating on an event from reference [1]. Thi
 
 ![ArcStar Implementation](/images/ArcStar_implementation.png)  
 Screenshot from running [testDisplayPedestrian.py](https://github.com/believeinlain/PyAedatTools/blob/master/testDisplayPedestrian.py), which performs corner detection on pedestrian data from reference [2] using recommended Arc* parameters from reference [1] on an SAE constructed from 'on' events (shown in white). The detected corners are shown in red, and the 'off' events are shown in black.
+
+This approach was found to be quite effective at finding corners on a variety of datasets, however we still need to find a means of discriminating between corners from noise, corners from objects, and corners from dynamic scenery. Also, this approach is somewhat expensive in its current implementation, and although it could stand to be optimized somewhat, it may also be replaced by a less accurate but faster algorithm.
 
 ## Outstanding issues
 
