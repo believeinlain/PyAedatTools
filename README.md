@@ -7,7 +7,7 @@ The focus of this repo has been to implement asynchronous tracking and segmentat
 
 ## EventPlayback
 
-The central module for displaying and processing data is the [EventPlayback](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/EventPlayback.py) module which takes **eventData** in the form of a dict composed of numpy arrays (as returned by the [ImportAedat](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/ImportAedat.py) function, along with a number of dicts containing parameters for the tracking and data segmentation algorithms that have been implemented so far.
+The central module for displaying and processing data is the [EventPlayback](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/EventPlayback.py) module which takes **eventData** in the form of a dict composed of numpy arrays (as returned by the [ImportAedat](https://github.com/believeinlain/PyAedatTools/blob/master/PyAedatTools/ImportAedat.py) function), along with a number of dicts containing parameters for the tracking and data segmentation algorithms that have been implemented so far.
 
 The events in **eventData** are processed asynchronously, and the results are cached into frames every **frameStep** milliseconds, in order to avoid updating the display too frequently. The results are displayed using pygame.
 
