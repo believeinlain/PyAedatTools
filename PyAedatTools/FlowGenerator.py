@@ -7,8 +7,8 @@ from math import pi
 # Flow Generator takes in events and assigns them flow vectors based on
 # an optical flow assessment
 class FlowGenerator:
-    def __init__(self):
-        self.flowPlane = FlowPlane()
+    def __init__(self, screenWidth, screenHeight, projRes, projAng):
+        self.flowPlaneModule = FlowPlaneModule(screenWidth, screenHeight, projRes, projAng)
         return
 
     # Takes an event and assigns it to a track plane, from which it determines
@@ -43,35 +43,38 @@ class FlowPlane:
     def getMetric(self):
         return np.sum(np.square(self.eventPolarities))
 
-
 # Flow plane module projects events onto flow planes and computes a grid
 # of metrics for events encountered so far
 class FlowPlaneModule:
-    def __init__(self, width, height, projectionResolution, projectionAngle):
-        self.width = width
-        self.height = height
-        self.n = projectionResolution # perturbations are stored in nxn grid
+    def __init__(self, width, height, projRes, projAng):
+        #self.width = width
+        #self.height = height
+        self.n = projRes # perturbations are stored in nxn grid
         # an odd grid size is recommended so that we have a center of (0,0)
-        self.r = projectionAngle # perturbations range from [-r/2 to r/2]
-        # fill array of flow projections
-        self.sumProjectedEvents = [[
-            np.zeros((width, height)) for i in range(self.n)
-        self.flowProjections = [[
-            (ceil(i-self.n/2)/(self.n-1)*self.r, 
-            ceil(j-self.n/2)/(self.n-1)*self.r) 
-            for i in range(self.n)] for j in range(self.n)]
+        self.r = projAng # perturbations range from [-r/2 to r/2]
+        # fill dict of flow planes (to use dict comprehension)
+        flowPlaneIndices = []
+        for i in range(self.n):
+            for j in range(self.n):
+                flowPlaneIndices.append((i, j))
+        self.flowPlanes = {
+            (i, j): FlowPlane(width, height, 
+                    (ceil(i-self.n/2)/(self.n-1)*self.r, 
+                    ceil(j-self.n/2)/(self.n-1)*self.r) )
+            for (i, j) in flowPlaneIndices}
     
     # project an event onto each flow projection
     def projectEvent(self, u, v, t, s):
         for i in range(self.n):
             for j in range(self.n):
-                # get the velocity from the projection angles
-                (vu, vv) = self.flowProjections[i][j]
-                # project the event onto that angle
-                x = u - vu*t 
-                y = v - vv*t
-        
-        self.sumProjectedEvents[x][y] += s# + self.sumProjectedEvents(projectedEvent)
+                self.flowPlanes[i][j].projectEvent(u, v, t, s)
+    
+    # get the index of the flow plane with the highest metric value
+    def getMaxMetric(self):
+        return max(self.flowPlanes, key=lambda plane: plane.getMetric())
+
+    # get normalized metric array
+    def getNormalizedMetricArray()
 
                 
 
