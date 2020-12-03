@@ -13,8 +13,8 @@ aedat['importParams'] = {}
 #filename = "Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
 filename = "Davis346red-2020-06-26T12-26-42-0700-00000195-0_Test_2.aedat"
 
-# "C:\Users\saael\OneDrive\Documents\NIWC\NeuroComp\AEDATA_11-12-20"
-aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
+aedat['importParams']['filePath'] = "C:/Users/saael/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/"+filename
+# aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
 
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
