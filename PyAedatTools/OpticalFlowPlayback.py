@@ -63,6 +63,9 @@ def playOpticalFlow(
     # keep track of total frames drawn
     numFramesDrawn = 0
 
+    # initialize FlowGenerator
+    flowGenerator = FlowGenerator.FlowGenerator(**flowGeneratorArgs)
+
     # enter pygame loop
     running = True
     while running:
@@ -81,6 +84,9 @@ def playOpticalFlow(
 
                 # get reference to event surface pixels as 3d array [x][y][color]
                 pixels = pygame.surfarray.pixels3d(events)
+            
+                # get the time of the first event so events can be processed starting from time 0
+                startTime = eventData['timeStamp'][0]
                 
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] \
@@ -91,6 +97,13 @@ def playOpticalFlow(
                         polarity = 1
                     else:
                         polarity = -1
+
+                    # process the event for optical flow analysis
+                    flowGenerator.processEvent(
+                        eventData['x'][i], 
+                        eventData['y'][i], 
+                        eventData['timeStamp'][i]-startTime,
+                        polarity)
 
                     # choose event color
                     if eventData['polarity'][i] == True:
@@ -107,6 +120,18 @@ def playOpticalFlow(
 
                 # free event surface pixel array
                 del pixels
+
+                # draw the optical flow metric array
+                metricArray = flowGenerator.flowPlaneModule.getNormalizedMetricArray()
+
+                n = flowGeneratorArgs['projRes']
+                gridSize = int(height/n)
+                for ni in range(n):
+                    for nj in range(n):
+                        # draw a rect corresponding to the value of the metric for each angle
+                        color = (255*metricArray[ni][nj], 255*metricArray[ni][nj], 255*metricArray[ni][nj])
+                        rect = pygame.Rect(ni*gridSize, nj*gridSize, gridSize, gridSize)
+                        pygame.draw.rect(flowPlaneSurface, color, rect)
 
                 # draw the event surface onto the screen
                 screen.fill((0,0,0,255))

@@ -3,6 +3,7 @@ import numpy as np
 
 from math import ceil
 from math import pi
+from math import sin
 
 # Flow Generator takes in events and assigns them flow vectors based on
 # an optical flow assessment
@@ -14,8 +15,12 @@ class FlowGenerator:
     # Takes an event and assigns it to a track plane, from which it determines
     # that event's flow vector. If an event cannot be immediately assigned,
     # the flow vector will be (0, 0)
-    def processEvent(self, x, y, t):
+    def processEvent(self, x, y, t, p):
         flowVector = (0, 0)
+
+        # accumulate events that don't match a track plane in the flow plane module
+        self.flowPlaneModule.projectEvent(x, y, t, p)
+
         return flowVector
 
 # Flow plane module projects events onto flow planes and computes a grid
@@ -43,7 +48,7 @@ class FlowPlaneModule:
     def projectEvent(self, u, v, t, s):
         for i in range(self.n):
             for j in range(self.n):
-                self.flowPlanes[i][j].projectEvent(u, v, t, s)
+                self.flowPlanes[(i, j)].projectEvent(u, v, t, s)
     
     # get the index of the flow plane with the highest metric value
     def getMaxMetricIndex(self):
@@ -52,15 +57,13 @@ class FlowPlaneModule:
     # get normalized metric array (numpy array)
     def getNormalizedMetricArray(self):
         # get the value of the max metric
-        maxMetric = self.flowPlanes[self.getMaxMetricIndex()]
+        maxMetric = self.flowPlanes[self.getMaxMetricIndex()].metric
 
         normalizedArray = np.zeros((self.n, self.n), np.float)
         for (i, j) in self.flowPlanes.keys():
             normalizedArray[i][j] = float(self.flowPlanes[(i, j)].metric) / float(maxMetric)
         
         return normalizedArray
-
-
 
 # Flow plane consists of a plane and a normal onto which events are projected
 # and summed to compute a metric which corresponds to how well events follow
@@ -75,11 +78,12 @@ class FlowPlane:
     
     # project the event onto this plane
     def projectEvent(self, u, v, t, s):
-        # break apart the normal into components
-        (vu, vv) = self.normal
+        # break apart the normal angle into vector components
+        vu = sin(self.normal[0])*self.width
+        vv = sin(self.normal[1])*self.height
         # project the event onto the normal
-        x = u - vu*t 
-        y = v - vv*t
+        x = int(u - vu*t)
+        y = int(v - vv*t)
         # add the event to the plane if it is within bounds
         if (x >= 0 and x < self.width and y >= 0 and y < self.height):
             self.eventPolarities[x][y] += s
@@ -87,4 +91,3 @@ class FlowPlane:
         # for each new event
         self.metric = np.sum(np.square(self.eventPolarities))
                 
-

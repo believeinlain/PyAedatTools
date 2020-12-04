@@ -8,9 +8,9 @@ from math import pi
 aedat = {}
 aedat['importParams'] = {}
 
-filename = "Davis346red-2020-06-26T12-26-42-0700-00000195-0_Test_2.aedat"
+filename = "IMU_translBoxes.aedat"
 
-aedat['importParams']['filePath'] = "C:/Users/saael/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/"+filename
+aedat['importParams']['filePath'] = "C:/Users/saael/Resilio Sync/BodoRuckhauerDVSOpticalFlowData/real samples/IMU_DVS/"+filename
 # aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
 
 # Invoke the function
@@ -30,13 +30,13 @@ eventPlaybackArgs = {
     'caption': "Optical Flow Analysis",
     'width': 350,
     'height': 265,
-    'playbackSpeed': 50,
+    'playbackSpeed': 100,
     'fadeRate': 10,
     'frameStep': 30
 }
 
 flowGeneratorArgs = {
-    'projRes': 10, 
+    'projRes': 6, 
     'projAng': pi
 }
 
