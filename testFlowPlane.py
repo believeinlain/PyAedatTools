@@ -10,7 +10,7 @@ aedat['importParams'] = {}
 
 filename = "IMU_translBoxes.aedat"
 
-aedat['importParams']['filePath'] = "C:/Users/saael/Resilio Sync/BodoRuckhauerDVSOpticalFlowData/real samples/IMU_DVS/"+filename
+aedat['importParams']['filePath'] = "./example_data/"+filename
 # aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
 
 # Invoke the function
@@ -36,7 +36,7 @@ eventPlaybackArgs = {
 }
 
 flowGeneratorArgs = {
-    'projRes': 6, 
+    'projRes': 5, 
     'projAng': pi
 }
 

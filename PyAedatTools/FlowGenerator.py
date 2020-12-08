@@ -49,15 +49,15 @@ class FlowPlaneModule:
         for i in range(self.n):
             for j in range(self.n):
                 self.flowPlanes[(i, j)].projectEvent(u, v, t, s)
-    
-    # get the index of the flow plane with the highest metric value
-    def getMaxMetricIndex(self):
-        return max(self.flowPlanes, key=lambda plane: self.flowPlanes[plane].metric)
 
     # get normalized metric array (numpy array)
     def getNormalizedMetricArray(self):
+        # update all metrics
+        for f in self.flowPlanes.values():
+            f.updateMetric()
         # get the value of the max metric
-        maxMetric = self.flowPlanes[self.getMaxMetricIndex()].metric
+        maxMetricIndex = max(self.flowPlanes, key=lambda plane: self.flowPlanes[plane].metric)
+        maxMetric = self.flowPlanes[maxMetricIndex].metric
 
         normalizedArray = np.zeros((self.n, self.n), np.float)
         for (i, j) in self.flowPlanes.keys():
@@ -87,7 +87,8 @@ class FlowPlane:
         # add the event to the plane if it is within bounds
         if (x >= 0 and x < self.width and y >= 0 and y < self.height):
             self.eventPolarities[x][y] += s
-        # update metric (sum of the square of the sum at each location in the plane) 
-        # for each new event
+    
+    # update metric (sum of the square of the sum at each location in the plane) 
+    def updateMetric(self):
         self.metric = np.sum(np.square(self.eventPolarities))
                 
