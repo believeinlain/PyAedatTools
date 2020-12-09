@@ -11,7 +11,6 @@ aedat['importParams'] = {}
 filename = "IMU_translBoxes.aedat"
 
 aedat['importParams']['filePath'] = "./example_data/"+filename
-# aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
 
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
@@ -36,8 +35,10 @@ eventPlaybackArgs = {
 }
 
 flowGeneratorArgs = {
-    'projRes': 5, 
-    'projAng': pi
+    'projRes': 11, 
+    'projAng': pi,
+    'maxConvergenceThreshold': 200,
+    'eventAssociationThreshold': 1
 }
 
 # playback the event data

@@ -22,7 +22,11 @@ def playOpticalFlow(
     },
     flowGeneratorArgs = {
         'projRes': 10, 
-        'projAng': pi
+        'projAng': pi,
+        'maxConvergenceThreshold': 100,
+        'eventAssociationThreshold': 1,
+        'successiveProjectionScale': 0.1,
+        'numSuccessiveProjections': 3
     }
     ):
 
@@ -121,15 +125,20 @@ def playOpticalFlow(
                 # free event surface pixel array
                 del pixels
 
+                # update the metrics in the flow plane module and find new track planes if applicable
+                flowGenerator.updateFlowPlaneMetrics()
+
                 # draw the optical flow metric array
                 metricArray = flowGenerator.flowPlaneModule.getNormalizedMetricArray()
 
                 n = flowGeneratorArgs['projRes']
-                gridSize = int(height/n)
+                gridSize = height/n
                 for ni in range(n):
                     for nj in range(n):
                         # draw a rect corresponding to the value of the metric for each angle
-                        color = (255*metricArray[ni][nj], 255*metricArray[ni][nj], 255*metricArray[ni][nj])
+                        metric = metricArray[n-ni-1][n-nj-1]
+                        brightness = 255-255*metric
+                        color = (brightness, brightness, brightness)
                         rect = pygame.Rect(ni*gridSize, nj*gridSize, gridSize, gridSize)
                         pygame.draw.rect(flowPlaneSurface, color, rect)
 
