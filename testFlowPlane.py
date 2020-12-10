@@ -37,8 +37,10 @@ eventPlaybackArgs = {
 flowGeneratorArgs = {
     'projRes': 11, 
     'projAng': pi,
-    'maxConvergenceThreshold': 200,
-    'eventAssociationThreshold': 1
+    'maxConvergenceThreshold': 1000,
+    'eventAssociationThreshold': 1,
+    'successiveProjectionScale': 0.1,
+    'numSuccessiveProjections': 3
 }
 
 # playback the event data

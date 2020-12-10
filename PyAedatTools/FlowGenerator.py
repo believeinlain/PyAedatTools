@@ -51,6 +51,9 @@ class FlowGenerator:
         # accumulate events that don't match a track plane in the flow plane module
         self.flowPlaneModule.projectEvent(e)
 
+        # increment events with constant max
+        self.eventsWithConstantMax += 1
+
         return flowVector
 
     # update the metrics in the flow plane module and find new track planes if applicable
@@ -68,9 +71,21 @@ class FlowGenerator:
                 self.eventsWithConstantMax = 0
 
         # identify new structure if eventsWithConstantMax > p
-        if self.maxMetricIndex is not None and self.eventsWithConstantMax > self.p:
+        if self.eventsWithConstantMax > self.p:
             self.eventsWithConstantMax = 0
-            assocEvents = self.flowPlaneModule.getAssociatedEvents(self.w)
+            (assocEvents, normal) = self.flowPlaneModule.getAssociatedEvents(self.w)
+
+            print("Found TrackPlane with angle ", normal)
+
+            # remove associated events from accumulator
+            self.eventAccumulator = [e for e in self.eventAccumulator if e not in assocEvents]
+
+            # clear flow planes
+            self.flowPlaneModule = FlowPlaneModule(self.width, self.height, self.n, self.r, self.q, self.c)
+
+            # reproject accumulated events
+            for e in self.eventAccumulator:
+                self.flowPlaneModule.projectEvent(e)
 
 
 
@@ -121,6 +136,11 @@ class FlowPlaneModule:
         maxMetric = self.flowPlanes[self.getMaxMetricIndex()].metric
 
         normalizedArray = np.zeros((self.n, self.n), np.float)
+
+        # if max metric is 0, just return the array of zeros
+        if maxMetric == 0:
+            return normalizedArray
+
         for (i, j) in self.flowPlanes.keys():
             normalizedArray[i][j] = float(self.flowPlanes[(i, j)].metric) / float(maxMetric)
         
@@ -132,12 +152,12 @@ class FlowPlaneModule:
         maxMetricProjection = self.flowPlanes[self.getMaxMetricIndex()]
         assocEvents = maxMetricProjection.findAssocEvents(threshold)
 
-        # create a new flow plane module with a smaller angle r/q
         # if we have iterations of refinement left to do
+        # create a new flow plane module with a smaller angle r/q
         if self.c > 0:
-            self.childFlowPlaneModule = FlowPlaneModule(self.width, self.height, self.n, self.r/self.q, self.q, self.c-1)
+            self.childFlowPlaneModule = FlowPlaneModule(self.width, self.height, self.n, self.r*self.q, self.q, self.c-1)
 
-            # project associated events onto the new module
+            # project associated events onto the new flow plane module
             for e in assocEvents:
                 self.childFlowPlaneModule.projectEvent(e)
             
@@ -145,9 +165,9 @@ class FlowPlaneModule:
             self.childFlowPlaneModule.updateMetrics()
             return self.childFlowPlaneModule.getAssociatedEvents(threshold)
         
-        # otherwise, return the events we've already collected
+        # otherwise, return the events we've already collected and the angle of projection
         else:
-            return assocEvents
+            return (assocEvents, maxMetricProjection.normal)
             
 
 # Flow plane consists of a plane and a normal onto which events are projected
