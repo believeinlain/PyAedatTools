@@ -20,31 +20,43 @@ class FlowGenerator:
             maxConvergenceThreshold,
             eventAssociationThreshold,
             successiveProjectionScale,
-            numSuccessiveProjections):
-        self.width = screenWidth
-        self.height = screenHeight
-        self.n = projRes
-        self.r = projAng
+            numSuccessiveProjections, 
+            projResTrackPlane,
+            projAngTrackPlane,
+            newCellThreshold,
+            pixelLifetime):
         self.p = maxConvergenceThreshold # number of events with constant max metric to find a structure
         self.w = eventAssociationThreshold # standard deviation coefficient for events to associate with a projection
-        self.q = successiveProjectionScale
-        self.c = numSuccessiveProjections
+        self.flowPlaneModule = FlowPlaneModule(
+            screenWidth, 
+            screenHeight, 
+            projRes, 
+            projAng, 
+            successiveProjectionScale, 
+            numSuccessiveProjections)
+        self.trackPlaneModule = TrackPlaneModule(
+            screenWidth, 
+            screenHeight, 
+            projResTrackPlane, 
+            projAngTrackPlane, 
+            newCellThreshold, 
+            pixelLifetime)
 
-        self.flowPlaneModule = FlowPlaneModule(self.width, self.height, self.n, self.r, self.q, self.c)
         self.maxMetricIndex = None
         self.eventsWithConstantMax = 0
         self.eventAccumulator = []
 
     # Takes an event and assigns it to a track plane, from which it determines
-    # that event's flow vector. If an event cannot be immediately assigned,
-    # the flow vector will be (0, 0)
-    def processEvent(self, x, y, t, p):
-        flowVector = (0, 0)
-
+    # that event's flow vector. 
+    def processNewEvent(self, x, y, t, p):
         # TODO: this is probably a bad way to cache events but can't really think of a better one rn
         # data types chosen to minimize memory usage without overflow
         e = event(np.uint16(x), np.uint16(y), np.uint32(t), np.int8(p))
 
+        self.reprocessEvent(e)
+        
+    # separate function to process events already cached after identifying a new structure
+    def reprocessEvent(self, e):
         # keep the event in the cache of unassociated events
         self.eventAccumulator.append(e)
 
@@ -53,8 +65,6 @@ class FlowGenerator:
 
         # increment events with constant max
         self.eventsWithConstantMax += 1
-
-        return flowVector
 
     # update the metrics in the flow plane module and find new track planes if applicable
     def updateFlowPlaneMetrics(self):
@@ -81,13 +91,11 @@ class FlowGenerator:
             self.eventAccumulator = [e for e in self.eventAccumulator if e not in assocEvents]
 
             # clear flow planes
-            self.flowPlaneModule = FlowPlaneModule(self.width, self.height, self.n, self.r, self.q, self.c)
+            self.flowPlaneModule.clear()
 
             # reproject accumulated events
             for e in self.eventAccumulator:
                 self.flowPlaneModule.projectEvent(e)
-
-
 
 # Flow plane module projects events onto flow planes and computes a grid
 # of metrics for events encountered so far
@@ -100,18 +108,18 @@ class FlowPlaneModule:
         self.q = q
         self.c = c
         
-        # fill dict of flow planes (to use dict comprehension)
-        flowPlaneIndices = []
+        self.flowPlaneIndices = []
         for i in range(self.n):
             for j in range(self.n):
-                flowPlaneIndices.append((i, j))
+                self.flowPlaneIndices.append((i, j))
         
+        # fill dict of flow planes (to use dict comprehension)
         # store flow planes in a dict by index tuples
         self.flowPlanes = {
             (i, j): FlowPlane(width, height, 
                     (ceil(i-self.n/2)/(self.n-1)*self.r, 
                     ceil(j-self.n/2)/(self.n-1)*self.r) )
-            for (i, j) in flowPlaneIndices}
+            for (i, j) in self.flowPlaneIndices}
 
         self.childFlowPlaneModule = None
     
@@ -168,6 +176,15 @@ class FlowPlaneModule:
         # otherwise, return the events we've already collected and the angle of projection
         else:
             return (assocEvents, maxMetricProjection.normal)
+
+    # clear all the flow planes
+    def clear(self):
+        self.flowPlanes = {
+            (i, j): FlowPlane(self.width, self.height, 
+                    (ceil(i-self.n/2)/(self.n-1)*self.r, 
+                    ceil(j-self.n/2)/(self.n-1)*self.r) )
+            for (i, j) in self.flowPlaneIndices}
+        self.childFlowPlaneModule = None
             
 
 # Flow plane consists of a plane and a normal onto which events are projected
@@ -214,4 +231,98 @@ class FlowPlane:
                     events.extend(self.projectedEvents[i][j])
 
         return events
-                
+    
+# TrackPlane module to match events to best fit projections and manage track planes
+class TrackPlaneModule:
+    def __init__(self, 
+            width, 
+            height,
+            projRes, 
+            projAng,
+            newCellThreshold, # number of misses in a cell before declaring it valid
+            pixelLifetime=3 # number of pixels to travel before events expire 
+            ):
+        self.width = width
+        self.height = height
+        self.m = projRes
+        self.h = projAng
+        self.p = pixelLifetime
+        self.newCellThreshold = newCellThreshold
+
+        self.trackPlanes = []
+
+    # get the TrackPlane matching this event or None if no match
+    def tryEvent(self, e):
+        for tp in self.trackPlanes:
+            if tp.tryEvent(e):
+                # return the track plane to which this event belongs
+                return tp
+        
+        # event did not fit any track planes
+        return None
+
+    # create a new TrackPlane
+    def createNewTrackPlane(self, assocEvents, bestFitProjection):
+        self.trackPlanes.append(
+            TrackPlane(self.width, self.height, bestFitProjection, self.m, self.h, self.newCellThreshold, self.p))
+
+# a TrackPlane represents a best fit velocity vector corresponding to a structure
+class TrackPlane:
+    def __init__(self, 
+            width, 
+            height, 
+            normal, # best estimate projection in tuple form (radians, radians)
+            projRes, 
+            projAng, 
+            assocEvents, # events associated with this trackplane
+            newCellThreshold, # number of misses in a cell before declaring it valid
+            pixelLifetime=3 # number of pixels to travel before events expire 
+            ):  
+        self.width = width
+        self.height = height
+        self.normal = normal
+        self.m = projRes
+        self.h = projAng
+        self.p = pixelLifetime
+        self.newCellThreshold = newCellThreshold
+        self.assocEvents = assocEvents
+
+        # TODO: maintain an mxm array of accumulators and cells?
+        self.accumulator = {} # accumulate misses to find new valid cells
+        self.validCells = set() # cells considered part of this trackplane
+
+        # add all associated events to the set of valid cells
+        for e in assocEvents:
+            loc = self.projectEvent(e)
+            if loc is not None:
+                self.validCells.add(loc)
+
+    # try an event against this trackplane to see if it fits
+    def tryEvent(self, e):
+        loc = self.projectEvent(e)
+        if loc is None:
+            return False
+        else:
+            if loc in self.validCells:
+                self.assocEvents.append(e)
+                return True
+            else:
+                # TODO: add new valid cell if accumulator goes above newCellThreshold
+                # maybe keep track of missed events to add them to assocEvents later?
+                self.accumulator[loc] += 1
+        
+        return False
+
+    # project the event onto this plane
+    def projectEvent(self, e):
+        # break apart the normal angle into vector components
+        vu = sin(self.normal[0])*self.width
+        vv = sin(self.normal[1])*self.height
+        # project the event onto the normal
+        x = int(e.x - vu*e.t)
+        y = int(e.y - vv*e.t)
+        # return the location on the plane where the event fell
+        if (x >= 0 and x < self.width and y >= 0 and y < self.height):
+            return (x, y)
+        else:
+            return None
