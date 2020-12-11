@@ -124,7 +124,7 @@ class FlowGenerator:
     
     # get a list of (hue, size, normal) tuples for all trackplanes
     def getTrackPlaneDisplayData(self):
-        return [(tp.hue, len(tp.assocEvents), tp.normal) for tp in self.trackPlaneModule.trackPlanes]
+        return [(tp.hue, len(tp.assocEvents), tp.normal, tp.validCells) for tp in self.trackPlaneModule.trackPlanes]
 
 
 # Flow plane module projects events onto flow planes and computes a grid
@@ -266,7 +266,7 @@ class TrackPlaneModule:
             projRes, 
             projAng,
             newCellThreshold, # number of misses in a cell before declaring it valid
-            pixelLifetime=3 # number of pixels to travel before events expire 
+            pixelLifetime # number of pixels to travel before events expire 
             ):
         self.width = width
         self.height = height
