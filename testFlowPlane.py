@@ -40,7 +40,11 @@ flowGeneratorArgs = {
     'maxConvergenceThreshold': 1000,
     'eventAssociationThreshold': 1,
     'successiveProjectionScale': 0.1,
-    'numSuccessiveProjections': 3
+    'numSuccessiveProjections': 3,
+    'projResTrackPlane': 3,
+    'projAngTrackPlane': pi/8,
+    'newCellThreshold': 100,
+    'pixelLifetime': 3
 }
 
 # playback the event data

@@ -2,6 +2,7 @@
 import sys
 
 from math import pi
+from math import exp
 
 # ignore spurious pygame-related errors
 # pylint: disable=no-member
@@ -11,24 +12,7 @@ import pygame
 from PyAedatTools import FlowGenerator
 
 # display event data next to optical flow data
-def playOpticalFlow(
-    eventData,
-    eventPlaybackArgs = {
-        'caption': "Optical Flow Analysis",
-        'width': 350,
-        'height': 265,
-        'fadeRate': 10,
-        'frameStep': 30
-    },
-    flowGeneratorArgs = {
-        'projRes': 10, 
-        'projAng': pi,
-        'maxConvergenceThreshold': 100,
-        'eventAssociationThreshold': 1,
-        'successiveProjectionScale': 0.1,
-        'numSuccessiveProjections': 3
-    }
-    ):
+def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
 
     flowGeneratorArgs['screenWidth'] = eventPlaybackArgs['width']
     flowGeneratorArgs['screenHeight'] = eventPlaybackArgs['height']
@@ -103,7 +87,7 @@ def playOpticalFlow(
                         polarity = -1
 
                     # process the event for optical flow analysis
-                    flowGenerator.processEvent(
+                    flowGenerator.processNewEvent(
                         eventData['x'][i], 
                         eventData['y'][i], 
                         eventData['timeStamp'][i]-startTime,
@@ -141,6 +125,17 @@ def playOpticalFlow(
                         color = (brightness, brightness, brightness)
                         rect = pygame.Rect(ni*gridSize, nj*gridSize, gridSize, gridSize)
                         pygame.draw.rect(flowPlaneSurface, color, rect)
+
+                # draw track planes onto the flow metric array as colored circles
+                maxSize = height*0.1
+                scaleRate = 1 # bigger means it takes more events to reach maxSize
+                for (hue, size, normal) in flowGenerator.getTrackPlaneDisplayData():
+                    tpx = height*(normal[0]+pi/2)/pi
+                    tpy = height*(normal[1]+pi/2)/pi
+                    color = pygame.Color(0, 0, 0)
+                    color.hsva = (hue, 100, 100, 100)
+                    radius = maxSize*(1-exp(-size/scaleRate))
+                    pygame.draw.circle(flowPlaneSurface, color, (tpx, tpy), radius)
 
                 # draw the event surface onto the screen
                 screen.fill((0,0,0,255))
