@@ -48,7 +48,7 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
     # keep track of total events processed
     i = 0
 
-    # keep track of elapsed simulation time
+    # keep track of elapsed simulation time (in microseconds)
     t = 0
 
     # keep track of total frames drawn
@@ -71,7 +71,8 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
 
                 # each frame a set amount of simulation time passes
                 # therefore t may not reflect real time
-                t = t + frameStep
+                # frameStep is in milliseconds but events are recorded in microseconds
+                t = t + frameStep*1000
 
                 # get reference to event surface pixels as 3d array [x][y][color]
                 pixels = pygame.surfarray.pixels3d(events)
@@ -137,8 +138,8 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 maxSize = height*0.1
                 scaleRate = 1 # bigger means it takes more events to reach maxSize
                 for (hue, size, normal, cells) in flowGenerator.getTrackPlaneDisplayData():
-                    tpx = height*(normal[0]+pi/2)/pi
-                    tpy = height*(normal[1]+pi/2)/pi
+                    tpx = height-height*(normal[0]+pi/2)/pi
+                    tpy = height-height*(normal[1]+pi/2)/pi
                     color = pygame.Color(0, 0, 0)
                     color.hsva = (hue, 100, 100, 100)
                     radius = maxSize*(1-exp(-size/scaleRate))
@@ -147,7 +148,7 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                         # update pixel array to draw event
                         for j in range(3):
                             pixels[ width-x-1 ][ height-y-1 ][j] = color[j]
-                        pixels_alpha[ width-x-1 ][ height-y-1 ] = 255
+                        pixels_alpha[ width-x-1 ][ height-y-1 ] = 100
                 
                 # free trackplane surface pixel array
                 del pixels

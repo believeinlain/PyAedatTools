@@ -8,9 +8,9 @@ from math import pi
 aedat = {}
 aedat['importParams'] = {}
 
-filename = "IMU_translBoxes.aedat"
+filename = "TranslatingSquare.aedat"
 
-aedat['importParams']['filePath'] = "./example_data/"+filename
+aedat['importParams']['filePath'] = "./example_data/synthesized samples/"+filename
 
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
@@ -18,7 +18,7 @@ aedat = ImportAedat.ImportAedat(aedat)
 # create data structure to give to eventPlayback module
 polarityData = aedat['data']['polarity']
 eventData = {
-    'timeStamp': polarityData['timeStamp'],
+    'timeStamp': polarityData['timeStamp'], # time is in microseconds
     'x': polarityData['x'],
     'y': polarityData['y'],
     'polarity': polarityData['polarity'],
@@ -27,9 +27,9 @@ eventData = {
 
 eventPlaybackArgs = {
     'caption': "Optical Flow Analysis",
-    'width': 350,
-    'height': 265,
-    'playbackSpeed': 100,
+    'width': 250,
+    'height': 190,
+    'playbackSpeed': 1,
     'fadeRate': 10,
     'frameStep': 30
 }
@@ -37,10 +37,10 @@ eventPlaybackArgs = {
 flowGeneratorArgs = {
     'projRes': 11, 
     'projAng': pi,
-    'maxConvergenceThreshold': 10000,
+    'maxConvergenceThreshold': 5000,
     'eventAssociationThreshold': 1,
-    'successiveProjectionScale': 0.1,
-    'numSuccessiveProjections': 3,
+    'successiveProjectionScale': 0.5,
+    'numSuccessiveProjections': 1,
     'projResTrackPlane': 3,
     'projAngTrackPlane': pi/8,
     'newCellThreshold': 100,

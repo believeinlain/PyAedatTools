@@ -3,7 +3,7 @@ import numpy as np
 
 from math import ceil
 from math import pi
-from math import sin
+from math import tan
 
 from collections import namedtuple
 
@@ -15,9 +15,13 @@ event = namedtuple('event', 'x y t p')
 # collapsing the 3D space along vector normal, represented as
 # an angle along the u axis and an angle along the v axis
 def projectUVOntoPlane(u, v, t, normal, planeWidth, planeHeight):
+    # angle scaling factor is set for the number of microseconds
+    # it takes to travel 1 pixel at an angle of 45 degrees in
+    # temporal space
+    angleScale = 50000
     # break apart the normal angle into vector components
-    vu = sin(normal[0])*planeWidth
-    vv = sin(normal[1])*planeHeight
+    vu = tan(normal[0])/angleScale
+    vv = tan(normal[1])/angleScale
     # project the event onto the normal
     x = int(u - vu*t)
     y = int(v - vv*t)
@@ -253,7 +257,7 @@ class FlowPlane:
         # iterate through locations in the chosen projection and add them if significant
         for i in range(self.width):
             for j in range(self.height):
-                if self.eventPolarities[i][j] > average + stdDev*threshold:
+                if abs(self.eventPolarities[i][j]) > average + stdDev*threshold:
                     events.extend(self.projectedEvents[i][j])
 
         return events
