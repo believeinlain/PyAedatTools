@@ -6,10 +6,37 @@ from math import pi
 from math import tan
 
 from collections import namedtuple
+from collections import deque
 
 import ColorWheel
 
 event = namedtuple('event', 'x y t p')
+
+# array of events indexed by screen location
+# since events are sequential, they are stored in a deque for each pixel
+class eventArray:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.event = [[ deque() for i in range(height)] for j in range(width)]
+    
+    def addEvent(self, e):
+        self.event[e.x][e.y].append(e)
+    
+    def removeEvent(self, e):
+        self.event[e.x][e.y].remove(e)
+
+    def performOnEvents(self, func):
+        for col in self.event:
+            for queue in col:
+                for e in queue:
+                    func(e)
+    
+    def filterProjectedEventsByMask(self, mask, normal):
+        for col in self.event:
+            for queue in col:
+                for e in queue:
+                    (x, y) = projectUVOntoPlane(self.width)
 
 # project a point in 3D (u, v, time) space onto a plane by
 # collapsing the 3D space along vector normal, represented as
@@ -43,6 +70,8 @@ class FlowGenerator:
             projAngTrackPlane,
             newCellThreshold,
             pixelLifetime):
+        self.width = screenWidth
+        self.height = screenHeight
         self.p = maxConvergenceThreshold # number of events with constant max metric to find a structure
         self.w = eventAssociationThreshold # standard deviation coefficient for events to associate with a projection
         self.flowPlaneModule = FlowPlaneModule(
@@ -61,7 +90,7 @@ class FlowGenerator:
 
         self.maxMetricIndex = None
         self.eventsWithConstantMax = 0
-        self.eventAccumulator = []
+        self.eventAccumulator = eventArray(screenWidth, screenHeight)
 
     # Creates an event namedtuple and processes the event
     def processNewEvent(self, x, y, t, p):
@@ -82,7 +111,7 @@ class FlowGenerator:
     # separate function to process new events or reprocess event after identifying a new structure
     def processEvent(self, e):
         # keep the event in the cache of unassociated events
-        self.eventAccumulator.append(e)
+        self.eventAccumulator.addEvent(e)
 
         # accumulate events that don't match a track plane in the flow plane module
         self.flowPlaneModule.projectEvent(e)
@@ -110,20 +139,28 @@ class FlowGenerator:
             (assocEvents, normal) = self.flowPlaneModule.getAssociatedEvents(
                 self.flowPlaneModule.flowPlanes[self.maxMetricIndex].normal, self.w)
 
-            print("Found TrackPlane with angle ", normal)
+            print("\nFound TrackPlane with angle ", normal)
+
+            # project assocEvents onto newTrackPlaneMask to floodfill
+            newTrackPlaneMask = np.zeros((self.width, self.height), np.int8)
+            for e in assocEvents:
+                # project it onto the mask
+                (x, y) = projectUVOntoPlane(e.x, e.y, e.t, normal, self.width, self.height)
+                newTrackPlaneMask[(x-1):(x+1), (y-1):(y+1)] = 1
+
+                # remove associated events from accumulator
+                self.eventAccumulator.removeEvent(e)
+            
+            self.eventAccumulator.filterProjectedEventsByMask(mask, normal)
 
             # create a new trackplane
             self.trackPlaneModule.createNewTrackPlane(assocEvents, normal)
-
-            # remove associated events from accumulator
-            self.eventAccumulator = [e for e in self.eventAccumulator if e not in assocEvents]
 
             # clear flow planes
             self.flowPlaneModule.clear()
 
             # reproject accumulated events
-            for e in self.eventAccumulator:
-                self.flowPlaneModule.projectEvent(e)
+            self.eventAccumulator.performOnEvents(self.flowPlaneModule.projectEvent)
     
     # get a list of (hue, size, normal) tuples for all trackplanes
     def getTrackPlaneDisplayData(self):
