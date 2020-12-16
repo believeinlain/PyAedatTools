@@ -35,12 +35,11 @@ eventPlaybackArgs = {
 }
 
 flowGeneratorArgs = {
-    'projRes': 11, 
+    'projRes': 5, 
     'projAng': pi,
     'maxConvergenceThreshold': 5000,
     'eventAssociationThreshold': 1,
-    'successiveProjectionScale': 0.5,
-    'numSuccessiveProjections': 1,
+    'numSuccessiveProjections': 2,
     'projResTrackPlane': 3,
     'projAngTrackPlane': pi/8,
     'newCellThreshold': 100,

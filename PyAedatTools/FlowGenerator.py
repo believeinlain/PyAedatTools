@@ -38,7 +38,6 @@ class FlowGenerator:
             projAng, 
             maxConvergenceThreshold,
             eventAssociationThreshold,
-            successiveProjectionScale,
             numSuccessiveProjections, 
             projResTrackPlane,
             projAngTrackPlane,
@@ -50,8 +49,7 @@ class FlowGenerator:
             screenWidth, 
             screenHeight, 
             projRes, 
-            projAng, 
-            successiveProjectionScale, 
+            projAng,
             numSuccessiveProjections)
         self.trackPlaneModule = TrackPlaneModule(
             screenWidth, 
@@ -77,9 +75,9 @@ class FlowGenerator:
         # no match, so accumulate the event in search of other structures
         if tp is None:
             self.processEvent(e)
-        else: 
-            # increment events with constant max
-            self.eventsWithConstantMax += 1
+            return None
+        else:
+            return tp.hue
         
     # separate function to process new events or reprocess event after identifying a new structure
     def processEvent(self, e):
@@ -109,7 +107,8 @@ class FlowGenerator:
         # identify new structure if eventsWithConstantMax > p
         if self.eventsWithConstantMax > self.p:
             self.eventsWithConstantMax = 0
-            (assocEvents, normal) = self.flowPlaneModule.getAssociatedEvents(self.w)
+            (assocEvents, normal) = self.flowPlaneModule.getAssociatedEvents(
+                self.flowPlaneModule.flowPlanes[self.maxMetricIndex].normal, self.w)
 
             print("Found TrackPlane with angle ", normal)
 
@@ -134,13 +133,13 @@ class FlowGenerator:
 # Flow plane module projects events onto flow planes and computes a grid
 # of metrics for events encountered so far
 class FlowPlaneModule:
-    def __init__(self, width, height, n, r, q, c):
+    def __init__(self, width, height, n, r, c, centerAngle=(0,0)):
         self.width = width
         self.height = height
         self.n = n # normal angles are stored in nxn grid
         self.r = r # angles in metric array range from [-r/2 to r/2]
-        self.q = q
         self.c = c
+        self.centerAngle = centerAngle
         
         self.flowPlaneIndices = []
         for i in range(self.n):
@@ -151,8 +150,8 @@ class FlowPlaneModule:
         # store flow planes in a dict by index tuples
         self.flowPlanes = {
             (i, j): FlowPlane(width, height, 
-                    (ceil(i-self.n/2)/(self.n-1)*self.r, 
-                    ceil(j-self.n/2)/(self.n-1)*self.r) )
+                    (ceil(i-self.n/2)/(self.n-1)*self.r + self.centerAngle[0], 
+                    ceil(j-self.n/2)/(self.n-1)*self.r + self.centerAngle[1]) )
             for (i, j) in self.flowPlaneIndices}
 
         self.childFlowPlaneModule = None
@@ -189,7 +188,7 @@ class FlowPlaneModule:
         return normalizedArray
     
     # find the set of events associated with the predominant structure
-    def getAssociatedEvents(self, threshold):
+    def getAssociatedEvents(self, angle, threshold):
         # get the locations of all events associated with the max metric projection
         maxMetricProjection = self.flowPlanes[self.getMaxMetricIndex()]
         assocEvents = maxMetricProjection.findAssocEvents(threshold)
@@ -197,7 +196,12 @@ class FlowPlaneModule:
         # if we have iterations of refinement left to do
         # create a new flow plane module with a smaller angle r/q
         if self.c > 0:
-            self.childFlowPlaneModule = FlowPlaneModule(self.width, self.height, self.n, self.r*self.q, self.q, self.c-1)
+            self.childFlowPlaneModule = FlowPlaneModule(self.width, 
+                self.height, 
+                self.n, 
+                (self.r/self.n)*4, # child plane should cover adjacent planes and then some
+                self.c-1,
+                angle)
 
             # project associated events onto the new flow plane module
             for e in assocEvents:
@@ -205,7 +209,9 @@ class FlowPlaneModule:
             
             # get the events associated with the refined projection
             self.childFlowPlaneModule.updateMetrics()
-            return self.childFlowPlaneModule.getAssociatedEvents(threshold)
+            return self.childFlowPlaneModule.getAssociatedEvents(
+                self.childFlowPlaneModule.flowPlanes[self.childFlowPlaneModule.getMaxMetricIndex()].normal, 
+                threshold)
         
         # otherwise, return the events we've already collected and the angle of projection
         else:

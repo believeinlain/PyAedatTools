@@ -4,6 +4,10 @@ import sys
 from math import pi
 from math import exp
 
+# for saving screenshots
+from datetime import datetime
+import os
+
 # ignore spurious pygame-related errors
 # pylint: disable=no-member
 # pylint: disable=too-many-function-args
@@ -20,6 +24,9 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
     # initialize pygame
     pygame.init()
     pygame.display.set_caption(eventPlaybackArgs['caption'])
+
+    # remember date and time of this run
+    startDateTime = datetime.now()
 
     # update every frameStep
     UPDATE = pygame.USEREVENT+1
@@ -91,17 +98,17 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                         polarity = -1
 
                     # process the event for optical flow analysis
-                    flowGenerator.processNewEvent(
+                    eHue = flowGenerator.processNewEvent(
                         eventData['x'][i], 
                         eventData['y'][i], 
                         eventData['timeStamp'][i]-startTime,
                         polarity)
 
                     # choose event color
-                    if eventData['polarity'][i] == True:
-                        color = (255,255,255)
-                    else:
-                        color = (0,0,0)
+                    color = pygame.Color(255,255,255) if eventData['polarity'][i] else pygame.Color(0,0,0)
+                    # color event to match trackplane
+                    if eHue is not None:
+                        color.hsva = (eHue, 100, 100, 100)
 
                     # update pixel array to draw event
                     for j in range(3):
@@ -162,10 +169,16 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 screen.blit(flowPlaneSurface, (width,0))
 
                 # draw the track plane surface onto the screen
+                # TODO: make the alpha actually work
                 screen.blit(trackPlaneSurface, (0,0))
                 
                 # update the display
                 pygame.display.update()
+
+                # save the screen as an image
+                framePath = os.path.join(os.path.dirname(__file__), '../frames')
+                screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
+                #pygame.image.save(screen, os.path.join(framePath, screenshotName))
 
                 # update time elapsed
                 sys.stdout.write("\rTime %i" % t)
