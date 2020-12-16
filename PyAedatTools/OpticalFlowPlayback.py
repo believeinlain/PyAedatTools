@@ -31,7 +31,7 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
     # update every frameStep
     UPDATE = pygame.USEREVENT+1
     frameStep = eventPlaybackArgs['frameStep']
-    pygame.time.set_timer(UPDATE, frameStep)
+    pygame.time.set_timer(UPDATE, int(frameStep/eventPlaybackArgs['playbackSpeed']))
 
     # draw the optical flow plane metrics to the right of the events
     width = eventPlaybackArgs['width']
@@ -89,7 +89,7 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 
                 # add events until timeStamp > time since init
                 while i < eventData['numEvents'] \
-                    and (eventData['timeStamp'][0] + eventPlaybackArgs['playbackSpeed'] * t) > eventData['timeStamp'][i]:
+                    and (eventData['timeStamp'][0] + t) > eventData['timeStamp'][i]:
 
                     # pick event value from {-1, 1}
                     if eventData['polarity'][i] == True:
@@ -176,8 +176,8 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 pygame.display.update()
 
                 # save the screen as an image
-                framePath = os.path.join(os.path.dirname(__file__), '../frames')
-                screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
+                #framePath = os.path.join(os.path.dirname(__file__), '../frames')
+                #screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
                 #pygame.image.save(screen, os.path.join(framePath, screenshotName))
 
                 # update time elapsed
