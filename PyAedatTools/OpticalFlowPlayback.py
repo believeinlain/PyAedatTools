@@ -176,9 +176,9 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 pygame.display.update()
 
                 # save the screen as an image
-                #framePath = os.path.join(os.path.dirname(__file__), '../frames')
-                #screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
-                #pygame.image.save(screen, os.path.join(framePath, screenshotName))
+                framePath = os.path.join(os.path.dirname(__file__), '../frames')
+                screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
+                pygame.image.save(screen, os.path.join(framePath, screenshotName))
 
                 # update time elapsed
                 sys.stdout.write("\rTime %i" % t)
