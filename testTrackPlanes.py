@@ -35,7 +35,7 @@ eventPlaybackArgs = {
 }
 
 flowGeneratorArgs = {
-    'projRes': 5, 
+    'projRes': 5,
     'projAng': pi,
     'maxConvergenceThreshold': 10000,
     'eventAssociationThreshold': 1,

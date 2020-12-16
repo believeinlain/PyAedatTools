@@ -150,8 +150,8 @@ class FlowPlaneModule:
         # store flow planes in a dict by index tuples
         self.flowPlanes = {
             (i, j): FlowPlane(width, height, 
-                    (ceil(i-self.n/2)/(self.n-1)*self.r + self.centerAngle[0], 
-                    ceil(j-self.n/2)/(self.n-1)*self.r + self.centerAngle[1]) )
+                    (ceil(i-self.n/2)/(self.n)*self.r + self.centerAngle[0], 
+                    ceil(j-self.n/2)/(self.n)*self.r + self.centerAngle[1]) )
             for (i, j) in self.flowPlaneIndices}
 
         self.childFlowPlaneModule = None

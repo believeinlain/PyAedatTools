@@ -49,8 +49,8 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
     flowPlaneSurface = pygame.Surface((height, height))
     flowPlaneSurface.fill((255, 255, 255, eventPlaybackArgs['fadeRate']))
     # surface to draw trackplane projection cells onto
-    trackPlaneSurface = pygame.Surface((width, height), pygame.SRCALPHA)
-    trackPlaneSurface.fill((0, 0, 0, 0))
+#    trackPlaneSurface = pygame.Surface((width, height), pygame.SRCALPHA)
+#    trackPlaneSurface.fill((0, 0, 0, 0))
 
     # keep track of total events processed
     i = 0
@@ -108,7 +108,7 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                     color = pygame.Color(255,255,255) if eventData['polarity'][i] else pygame.Color(0,0,0)
                     # color event to match trackplane
                     if eHue is not None:
-                        color.hsva = (eHue, 100, 100, 100)
+                        color.hsva = (eHue, 100, 75+25*polarity, 100)
 
                     # update pixel array to draw event
                     for j in range(3):
@@ -138,8 +138,8 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                         pygame.draw.rect(flowPlaneSurface, color, rect)
 
                 # get reference to trackplane surface pixels as 3d array [x][y][color]
-                pixels = pygame.surfarray.pixels3d(trackPlaneSurface)
-                pixels_alpha = pygame.surfarray.pixels_alpha(trackPlaneSurface)
+#                pixels = pygame.surfarray.pixels3d(trackPlaneSurface)
+#                pixels_alpha = pygame.surfarray.pixels_alpha(trackPlaneSurface)
 
                 # draw track planes onto the flow metric array as colored circles
                 maxSize = height*0.1
@@ -148,18 +148,18 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                     tpx = height-height*(normal[0]+pi/2)/pi
                     tpy = height-height*(normal[1]+pi/2)/pi
                     color = pygame.Color(0, 0, 0)
-                    color.hsva = (hue, 100, 100, 100)
+                    color.hsva = (hue, 100, 100, 50)
                     radius = maxSize*(1-exp(-size/scaleRate))
                     pygame.draw.circle(flowPlaneSurface, color, (tpx, tpy), radius)
-                    for (x, y) in cells:
-                        # update pixel array to draw event
-                        for j in range(3):
-                            pixels[ width-x-1 ][ height-y-1 ][j] = color[j]
-                        pixels_alpha[ width-x-1 ][ height-y-1 ] = 100
+#                    for (x, y) in cells:
+#                        # update pixel array to draw event
+#                        for j in range(3):
+#                            pixels[ width-x-1 ][ height-y-1 ][j] = color[j]
+#                        pixels_alpha[ width-x-1 ][ height-y-1 ] = 100
                 
                 # free trackplane surface pixel array
-                del pixels
-                del pixels_alpha
+#                del pixels
+#                del pixels_alpha
 
                 # draw the event surface onto the screen
                 screen.fill((0,0,0,255))
@@ -170,7 +170,7 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
 
                 # draw the track plane surface onto the screen
                 # TODO: make the alpha actually work
-                screen.blit(trackPlaneSurface, (0,0))
+#                screen.blit(trackPlaneSurface, (0,0))
                 
                 # update the display
                 pygame.display.update()
