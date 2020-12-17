@@ -145,11 +145,11 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 maxSize = height*0.1
                 scaleRate = 1 # bigger means it takes more events to reach maxSize
                 for (hue, size, normal, cells) in flowGenerator.getTrackPlaneDisplayData():
-                    tpx = height-height*(normal[0]+pi/2)/pi
-                    tpy = height-height*(normal[1]+pi/2)/pi
+                    tpx = int(height-height*(normal[0]+pi/2)/pi)
+                    tpy = int(height-height*(normal[1]+pi/2)/pi)
                     color = pygame.Color(0, 0, 0)
                     color.hsva = (hue, 100, 100, 50)
-                    radius = maxSize*(1-exp(-size/scaleRate))
+                    radius = int(maxSize*(1-exp(-size/scaleRate)))
                     pygame.draw.circle(flowPlaneSurface, color, (tpx, tpy), radius)
 #                    for (x, y) in cells:
 #                        # update pixel array to draw event
@@ -176,9 +176,9 @@ def playOpticalFlow(eventData, eventPlaybackArgs, flowGeneratorArgs):
                 pygame.display.update()
 
                 # save the screen as an image
-                framePath = os.path.join(os.path.dirname(__file__), '../frames')
-                screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
-                pygame.image.save(screen, os.path.join(framePath, screenshotName))
+                #framePath = os.path.join(os.path.dirname(__file__), '../frames')
+                #screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
+                #pygame.image.save(screen, os.path.join(framePath, screenshotName))
 
                 # update time elapsed
                 sys.stdout.write("\rTime %i" % t)

@@ -39,7 +39,7 @@ flowGeneratorArgs = {
     'projAng': pi,
     'maxConvergenceThreshold': 5000,
     'eventAssociationThreshold': 1,
-    'numSuccessiveProjections': 2,
+    'numSuccessiveProjections': 3,
     'projResTrackPlane': 3,
     'projAngTrackPlane': pi/8,
     'newCellThreshold': 100,
