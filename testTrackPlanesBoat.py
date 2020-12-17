@@ -27,8 +27,8 @@ eventData = {
 
 eventPlaybackArgs = {
     'caption': "Optical Flow Analysis",
-    'width': 400,
-    'height': 300,
+    'width': 346,
+    'height': 260,
     'playbackSpeed': 0.1,
     'fadeRate': 10,
     'frameStep': 30

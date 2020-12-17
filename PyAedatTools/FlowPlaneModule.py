@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from math import ceil
+from math import floor
 
 from PyAedatTools import FlowGenerator
 
@@ -24,9 +24,7 @@ class FlowPlaneModule:
         # fill dict of flow planes (to use dict comprehension)
         # store flow planes in a dict by index tuples
         self.flowPlanes = {
-            (i, j): FlowPlane(width, height, 
-                    (ceil(i-self.n/2)/(self.n)*self.r + self.centerAngle[0], 
-                    ceil(j-self.n/2)/(self.n)*self.r + self.centerAngle[1]) )
+            (i, j): self.createFlowPlane(i, j)
             for (i, j) in self.flowPlaneIndices}
 
         self.childFlowPlaneModule = None
@@ -95,11 +93,14 @@ class FlowPlaneModule:
     # clear all the flow planes
     def clear(self):
         self.flowPlanes = {
-            (i, j): FlowPlane(self.width, self.height, 
-                    (ceil(i-self.n/2)/(self.n-1)*self.r, 
-                    ceil(j-self.n/2)/(self.n-1)*self.r) )
+            (i, j): self.createFlowPlane(i, j)
             for (i, j) in self.flowPlaneIndices}
         self.childFlowPlaneModule = None
+    
+    def createFlowPlane(self, i, j):
+        return FlowPlane(self.width, self.height, 
+                    ((i-(self.n-1)/2)*self.r/self.n + self.centerAngle[0], 
+                    (j-(self.n-1)/2)*self.r/self.n + self.centerAngle[1]) )
             
 
 # Flow plane consists of a plane and a normal onto which events are projected
