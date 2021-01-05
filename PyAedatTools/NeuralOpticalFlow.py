@@ -22,6 +22,11 @@ import nengo
 # then first neuron can turn in back on again
 # timing between being turned on and off determines the
 # velocity component in that direction
+#
+# output spikes should be integrated until next neuron fires
+# then integrator should be reset
+# so we need one integrator per direction
+# can we use a single neuron integrator?
 
 class NeuralOpticalFlow:
     def __init__(self, eventData, width, height):
