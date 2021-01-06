@@ -28,6 +28,39 @@ import nengo
 # so we need one integrator per direction
 # can we use a single neuron integrator?
 
+# import nengo
+
+# import numpy as np
+
+# def dvs_input(t):
+#     if (1*t)%1 == 0:
+#         return np.array([10])
+#     else:
+#         return np.array([0])
+
+# def dvs_input2(t):
+#     if (1*t)%1 == 0.5:
+#         return np.array([10])
+#     else:
+#         return np.array([0])
+        
+# n_neurons = 1
+
+# model = nengo.Network(label="Bistable System")
+# with model:
+#     on = nengo.Ensemble(n_neurons, dimensions=1)
+#     off = nengo.Ensemble(n_neurons, dimensions=1)
+    
+#     dvs = nengo.Node(dvs_input)
+#     dvs2 = nengo.Node(dvs_input2)
+    
+#     nengo.Connection(dvs, on)
+#     nengo.Connection(dvs2, off)
+#     nengo.Connection(on, on, transform=[[1.1]]);
+#     nengo.Connection(off, off, transform=[[1.1]]);
+#     nengo.Connection(off, on.neurons, transform=[[-0.5]] * n_neurons)
+#     nengo.Connection(on, off.neurons, transform=[[-0.5]] * n_neurons)
+
 class NeuralOpticalFlow:
     def __init__(self, eventData, width, height):
         self.eventData = eventData
