@@ -15,3 +15,7 @@ def getNextHue():
         getNextHue.currentHue = (getNextHue.currentHue + 10*pi) % 360
     
     return getNextHue.currentHue
+
+# get a *unique hue for each integer index
+def getHueByIndex(index):
+    return (index*10*pi) % 360

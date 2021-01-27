@@ -16,6 +16,10 @@ filename = "Davis346red-2020-06-26T12-26-42-0700-00000195-0_Test_2.aedat"
 aedat['importParams']['filePath'] = "C:/Users/saael/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/"+filename
 # aedat['importParams']['filePath'] = "../../AEDATA_11-12-20/"+filename
 
+filename = 'boat_filtered.aedat'
+
+aedat['importParams']['filePath'] = './example_data/'+filename
+
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
 
@@ -47,16 +51,16 @@ eventPlaybackArgs = {
 cornerTrackingArgs = {
     'passArray': [
         {'radius':3,'arcMin':3,'arcMax':5},
-        {'radius':4,'arcMin':4,'arcMax':6}
+        # {'radius':4,'arcMin':4,'arcMax':6}
     ],
     'SAEThreshold':50
 }
 
 featureTrackingArgs = {
     'enable':True,
-    'maxBufferSize':10000,
+    'maxBufferSize':5000,
     'trackRange':10,
-    'noiseThreshold':3
+    'noiseThreshold':5
 }
 
 clusterTrackingArgs = {

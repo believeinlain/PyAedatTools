@@ -8,7 +8,7 @@ from math import pi
 aedat = {}
 aedat['importParams'] = {}
 
-filename = "Davis346red-2020-06-12T12-31-10-0700-0_Test_7.aedat"
+filename = 'boat_filtered.aedat'
 
 aedat['importParams']['filePath'] = "./example_data/"+filename
 
@@ -37,7 +37,7 @@ eventPlaybackArgs = {
 flowGeneratorArgs = {
     'projRes': 5,
     'projAng': pi,
-    'maxConvergenceThreshold': 10000,
+    'maxConvergenceThreshold': 20000,
     'eventAssociationThreshold': 1,
     'numSuccessiveProjections': 2,
     'projResTrackPlane': 3,
