@@ -4,11 +4,11 @@ from collections import namedtuple
 event = namedtuple('event', 't p')
 
 class CorrelativeFilter:
-    def __init__(self, width, height, dt, numMustBeCorrelated):
+    def __init__(self, width, height, dt, minCorrelated):
         self.width = width
         self.height = height
         self.dt = dt
-        self.n = numMustBeCorrelated
+        self.minCorrelated = minCorrelated
         self.buffer = [[[] for y in range(height)] for x in range(width)]
     
     # p should be 0 for off event, 1 for on event
@@ -32,4 +32,4 @@ class CorrelativeFilter:
         self.buffer[x][y].append(event(t, p))
 
         # return result
-        return count>=self.n
+        return count>=self.minCorrelated

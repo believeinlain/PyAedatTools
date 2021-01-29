@@ -20,17 +20,17 @@ from PyAedatTools import RegionFinder
 import ColorWheel
 
 # display event data next to optical flow data
-def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs):
+def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFinderArgs):
 
-    correlativeFilterArgs['width'] = eventPlaybackArgs['width']
-    correlativeFilterArgs['height'] = eventPlaybackArgs['height']
-    
     # initialize pygame
     pygame.init()
     pygame.display.set_caption(eventPlaybackArgs['caption'])
 
+    font = pygame.font.Font('freesansbold.ttf', 12)
+
     # remember date and time of this run
-    #startDateTime = datetime.now()
+    if eventPlaybackArgs['saveFrames']:
+        startDateTime = datetime.now()
 
     # update every frameStep
     UPDATE = pygame.USEREVENT+1
@@ -59,25 +59,12 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs):
     numFramesDrawn = 0
 
     # initialize CorrelativeFilter
-    correlativeFilter = CorrelativeFilter.CorrelativeFilter(**correlativeFilterArgs)
+    correlativeFilter = CorrelativeFilter.CorrelativeFilter(width, height, **correlativeFilterArgs)
 
-    # initialize cluster tracker
-    # clusterTracker = TightClusterTracking.TightClusterTracker(
-    #     clusterRange=10, 
-    #     shiftSensitivity=.1, 
-    #     tightSensitivity=.1)
-
-    regionFinder = RegionFinder.RegionFinder(width, height)
-
-    # featureTracker = FeatureTracking.FeatureTracker(
-    #     maxBufferSize=1000,
-    #     trackRange=5,
-    #     noiseThreshold=0,
-    #     dimWidth=width,
-    #     dimHeight=height
-    # )
+    regionFinder = RegionFinder.RegionFinder(width, height, **regionFinderArgs)
 
     # enter pygame loop
+    # TODO: end when we run out of events
     running = True
     while running:
         for event in pygame.event.get():
@@ -114,24 +101,12 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs):
                     # update pixel array to draw event (if not filtered)
                     if allowEvent:
                         # only track allowed events
-                        # clusterTracker.processEvent(
-                        #     int(eventData['x'][i]), 
-                        #     int(eventData['y'][i]), 
-                        #     eventData['timeStamp'][i]-startTime,
-                        #     eventData['polarity'][i])
-
                         assignedRegion = regionFinder.processEvent(
                             eventData['x'][i], 
                             eventData['y'][i], 
                             eventData['timeStamp'][i]-startTime)
 
-                        # featureTracker.processFeature(
-                        #     int(eventData['x'][i]), 
-                        #     int(eventData['y'][i]), 
-                        #     int(eventData['timeStamp'][i]-startTime))
-
                         # choose event color
-                        # color = pygame.Color(255,255,255) if eventData['polarity'][i] else pygame.Color(0,0,0)
                         color = pygame.Color(0, 0, 0)
                         color.hsva = (
                             ColorWheel.getHueByIndex(assignedRegion), 
@@ -154,28 +129,30 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs):
                 screen.fill((0,0,0,255))
                 screen.blit(events, (0,0))
 
-                focus = regionFinder.getOldestRegion()
-                center = (width-focus.locations[0][0], height-focus.locations[0][1])
-                color = (100, 0, 0)
-                pygame.draw.circle(screen, color, center, radius=10, width=1)
+                # sort regions by age
+                regionsByBirth = sorted(list(regionFinder.regions.values()), key=lambda r: r.birth)
 
-                # draw clusters onto the screen
-                # for c in clusterTracker.clusters:
-                #     center = (width-c.x, height-c.y)
-                #     color = (c.tightness, 0, 0)
-                #     pygame.draw.circle(screen, color, center, clusterTracker.range, width=1)
-
-                 # draw features being tracked
-                # for f in featureTracker.featureList:
-                #     pygame.draw.circle(screen, (255, 0, 0), (width-f.x-1, height-f.y-1), 3)
+                # show the five oldest regions with age in seconds
+                for k in range(min(len(regionsByBirth), 5)):
+                    focus = regionsByBirth[k]
+                    x, y = focus.getCentroid()
+                    center = (width-x, height-y)
+                    age = t - focus.birth
+                    text = font.render("%.1f"%(age/1000000), True, (255,255,255))
+                    textRect = text.get_rect()
+                    textRect.center = center
+                    color = (255/(k+1), 0, 0)
+                    pygame.draw.circle(screen, color, center, radius=15, width=1)
+                    screen.blit(text, textRect)
                 
                 # update the display
                 pygame.display.update()
 
                 # save the screen as an image
-                #framePath = os.path.join(os.path.dirname(__file__), '../frames')
-                #screenshotName = "run-" + startDateTime.strftime("%H-%M-%S") + "-%04d.png" % numFramesDrawn
-                #pygame.image.save(screen, os.path.join(framePath, screenshotName))
+                if eventPlaybackArgs['saveFrames']:
+                    framePath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frames'))
+                    screenshotName = "run-" + startDateTime.strftime("%H-%M") + "-%04d.png" % numFramesDrawn
+                    pygame.image.save(screen, os.path.join(framePath, screenshotName))
 
                 # update time elapsed
                 sys.stdout.write("\rTime %i" % t)

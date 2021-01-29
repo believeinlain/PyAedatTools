@@ -11,12 +11,49 @@ aedat['importParams'] = {}
 
 # Put the filename, including full path, in the 'filePath' field.
 
-# filename = "Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
-filename = 'Davis346red-2020-06-12T12-31-10-0700-0_Test_7.aedat'
-aedat['importParams']['filePath'] = './example_data/'+filename
+# works well
+correlativeFilterArgs = {
+    'dt': 100000,
+    'minCorrelated': 4
+}
+regionFinderArgs = {
+    'regionLifespan': 100000,
+    'SAEThreshold': 50000
+}
+filename = './example_data/Davis346red-2020-06-12T12-31-10-0700-0_Test_7.aedat'
+# kinda works
+correlativeFilterArgs = {
+    'dt': 100000,
+    'minCorrelated': 4
+}
+regionFinderArgs = {
+    'regionLifespan': 100000,
+    'SAEThreshold': 50000
+}
+filename = "C:/Users/steph/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
+# also works pretty decently
+# correlativeFilterArgs = {
+#     'dt': 100000,
+#     'minCorrelated': 3
+# }
+# regionFinderArgs = {
+#     'regionLifespan': 100000,
+#     'SAEThreshold': 50000
+# }
+# filename = "C:/Users/steph/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/Davis346red-2020-06-12T12-24-03-0700-0_Test_5.aedat"
+# really needs localized filter
+# correlativeFilterArgs = {
+#     'dt': 50000,
+#     'minCorrelated': 3
+# }
+# regionFinderArgs = {
+#     'regionLifespan': 50000,
+#     'SAEThreshold': 50000
+# }
+# filename = "C:/Users/steph/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/Davis346red-2020-06-26T12-26-42-0700-00000195-0_Test_2.aedat"
 
-# filename = 'boat_filtered.aedat'
-# aedat['importParams']['filePath'] = './example_data/'+filename
+
+aedat['importParams']['filePath'] = filename
 
 # Invoke the function
 aedat = ImportAedat.ImportAedat(aedat)
@@ -32,18 +69,14 @@ eventData = {
 }
 
 eventPlaybackArgs = {
-    'caption': 'Correlative filter',
+    'caption': 'Boat detection',
     'width': 350,
     'height': 265,
-    'playbackSpeed': 2,
+    'playbackSpeed': 1,
     'fadeAlpha': 1,
-    'frameStep': 60
-}
-
-correlativeFilterArgs = {
-    'dt': 100000,
-    'numMustBeCorrelated': 3
+    'frameStep': 30,
+    'saveFrames': False
 }
 
 # playback the event data
-SimpleEventPlayback.beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs)
+SimpleEventPlayback.beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFinderArgs)

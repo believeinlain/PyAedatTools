@@ -2,7 +2,7 @@
 import numpy as np
 
 class SurfaceOfActiveEvents:
-    def __init__(self, width, height, noiseFilter=50000):
+    def __init__(self, width, height, noiseFilter):
         self.width = width
         self.height = height
         self.k = noiseFilter
@@ -17,7 +17,7 @@ class SurfaceOfActiveEvents:
         self.tl[x, y] = t
 
 class Region:
-    def __init__(self, x, y, birth, regionFinder,  lifespan=100000):
+    def __init__(self, x, y, birth, regionFinder,  lifespan):
         self.locations = [(x, y)]
         self.lifespan = lifespan
         self.finder = regionFinder
@@ -32,13 +32,21 @@ class Region:
                 self.locations.remove((x, y))
                 self.finder.clearLocation(x, y)
 
+    def getCentroid(self):
+        arr = np.array(self.locations)
+        length = arr.shape[0]
+        sum_x = np.sum(arr[:, 0])
+        sum_y = np.sum(arr[:, 1])
+        return sum_x/length, sum_y/length
+
 class RegionFinder:
-    def __init__(self, width, height):
+    def __init__(self, width, height, regionLifespan=100000, SAEThreshold=50000):
         self.width = width
         self.height = height
         self.regionIndex = np.full((width, height), -1, np.int)
         self.regions = {}
-        self.SAE = SurfaceOfActiveEvents(width, height)
+        self.SAE = SurfaceOfActiveEvents(width, height, SAEThreshold)
+        self.regionLifespan = regionLifespan
     
     def processEvent(self, x, y, t):
         # update the SAE
@@ -98,7 +106,7 @@ class RegionFinder:
         # assign the index to the location
         self.regionIndex[x][y] = index
         # create a new region with that index
-        self.regions[index] = Region(x, y, t, self)
+        self.regions[index] = Region(x, y, t, self, self.regionLifespan)
         # return the index of the new region
         return index
 
