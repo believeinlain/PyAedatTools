@@ -1,20 +1,7 @@
 
 import numpy as np
 
-class SurfaceOfActiveEvents:
-    def __init__(self, width, height, noiseFilter):
-        self.width = width
-        self.height = height
-        self.k = noiseFilter
-        self.tr = np.zeros((width, height), np.int)
-        self.tl = np.zeros((width, height), np.int)
-
-    def processEvent(self, x, y, t):
-        # update tr only if t > tl + k
-        if t > self.tl[x, y]+self.k:
-            self.tr[x, y] = t
-        # always update tl
-        self.tl[x, y] = t
+from PyAedatTools import SurfaceOfActiveEvents
 
 class Region:
     def __init__(self, x, y, birth, regionFinder,  lifespan):
@@ -22,36 +9,63 @@ class Region:
         self.lifespan = lifespan
         self.finder = regionFinder
         self.birth = birth
+        self.centroid = (0, 0)
     
     def addLocation(self, x, y):
+        # calculate the new centroid
+        mass = len(self.locations)
+        if mass==0:
+            self.centroid = (x, y)
+        else:
+            newEventWeight = 1/mass
+            (cx, cy) = self.centroid
+            cx += (x-cx)*newEventWeight
+            cy += (y-cy)*newEventWeight
+            self.centroid = (cx, cy)
+
+        # add the new location
         self.locations.append((x, y))
 
+    # TODO: update centroid on event removal?
     def update(self, t):
+        # clear expired locations
         for (x, y) in self.locations:
             if t - self.finder.SAE.tr[x, y] > self.lifespan:
                 self.locations.remove((x, y))
                 self.finder.clearLocation(x, y)
 
+    def mergeInto(self, other):
+        # calculate the new centroid
+        # mass = len(self.locations)
+        # otherMass = len(other.locations)
+        # if mass==0:
+        #     self.centroid = other.centroid
+        # else:
+        #     newRegionWeight = otherMass/mass
+        #     (cx, cy) = self.centroid
+        #     (ox, oy) = other.centroid
+        #     cx += (ox-cx)*newRegionWeight
+        #     cy += (oy-cy)*newRegionWeight
+        #     self.centroid = (cx, cy)
+        
+        # add the new location
+        for (x, y) in other.locations:
+            self.addLocation(x, y)
+            # self.locations.append((x, y))
+
     def getCentroid(self):
-        arr = np.array(self.locations)
-        length = arr.shape[0]
-        sum_x = np.sum(arr[:, 0])
-        sum_y = np.sum(arr[:, 1])
-        return sum_x/length, sum_y/length
+        return self.centroid
 
 class RegionFinder:
-    def __init__(self, width, height, regionLifespan=100000, SAEThreshold=50000):
+    def __init__(self, width, height, SAE, regionLifespan=100000):
         self.width = width
         self.height = height
         self.regionIndex = np.full((width, height), -1, np.int)
         self.regions = {}
-        self.SAE = SurfaceOfActiveEvents(width, height, SAEThreshold)
+        self.SAE = SAE
         self.regionLifespan = regionLifespan
     
     def processEvent(self, x, y, t):
-        # update the SAE
-        self.SAE.processEvent(x, y, t)
-
         # assign the event to the region at (x, y)
         assignedRegion = self.regionIndex[x][y]
         # if the location is not already part of a region
@@ -72,7 +86,8 @@ class RegionFinder:
                 for r in adjacentRegions:
                     for (x, y) in self.regions[r].locations:
                         self.regionIndex[x, y] = largestRegion
-                        self.regions[largestRegion].addLocation(x, y)
+                    self.regions[largestRegion].mergeInto(self.regions[r])
+
                 assignedRegion = largestRegion
             
             elif len(adjacentRegions) == 1:

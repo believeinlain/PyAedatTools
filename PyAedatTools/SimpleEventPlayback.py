@@ -14,13 +14,13 @@ import os
 import pygame
 
 from PyAedatTools import CorrelativeFilter
-# from PyAedatTools import TightClusterTracking
+from PyAedatTools import SurfaceOfActiveEvents
 from PyAedatTools import RegionFinder
 
 import ColorWheel
 
 # display event data next to optical flow data
-def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFinderArgs):
+def beginPlayback(eventData, eventPlaybackArgs, SAEArgs, correlativeFilterArgs, regionFinderArgs):
 
     # initialize pygame
     pygame.init()
@@ -29,8 +29,7 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFin
     font = pygame.font.Font('freesansbold.ttf', 12)
 
     # remember date and time of this run
-    if eventPlaybackArgs['saveFrames']:
-        startDateTime = datetime.now()
+    startDateTime = datetime.now()
 
     # update every frameStep
     UPDATE = pygame.USEREVENT+1
@@ -59,9 +58,9 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFin
     numFramesDrawn = 0
 
     # initialize CorrelativeFilter
-    correlativeFilter = CorrelativeFilter.CorrelativeFilter(width, height, **correlativeFilterArgs)
-
-    regionFinder = RegionFinder.RegionFinder(width, height, **regionFinderArgs)
+    SAE = SurfaceOfActiveEvents.SurfaceOfActiveEvents(width, height, **SAEArgs)
+    correlativeFilter = CorrelativeFilter.CorrelativeFilter(width, height, SAE, **correlativeFilterArgs)
+    regionFinder = RegionFinder.RegionFinder(width, height, SAE, **regionFinderArgs)
 
     # enter pygame loop
     # TODO: end when we run out of events
@@ -100,7 +99,12 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFin
 
                     # update pixel array to draw event (if not filtered)
                     if allowEvent:
-                        # only track allowed events
+                        # update the SAE
+                        SAE.processEvent(
+                            eventData['x'][i], 
+                            eventData['y'][i], 
+                            eventData['timeStamp'][i]-startTime)
+                        # # only track allowed events
                         assignedRegion = regionFinder.processEvent(
                             eventData['x'][i], 
                             eventData['y'][i], 
@@ -113,6 +117,8 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFin
                             100, 
                             75+25*eventData['polarity'][i], 
                             100)
+
+                        # color = pygame.Color(255, 255, 255) if eventData['polarity'][i] else pygame.Color(0, 0, 0)
 
                         for j in range(3):
                             pixels[ width-eventData['x'][i]-1 ][ height-eventData['y'][i]-1 ][j] = color[j]
@@ -132,18 +138,18 @@ def beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFin
                 # sort regions by age
                 regionsByBirth = sorted(list(regionFinder.regions.values()), key=lambda r: r.birth)
 
-                # show the five oldest regions with age in seconds
+                # # show the five oldest regions with age in seconds
                 for k in range(min(len(regionsByBirth), 5)):
                     focus = regionsByBirth[k]
                     x, y = focus.getCentroid()
                     center = (width-x, height-y)
-                    age = t - focus.birth
-                    text = font.render("%.1f"%(age/1000000), True, (255,255,255))
-                    textRect = text.get_rect()
-                    textRect.center = center
+                    # age = t - focus.birth
+                    # text = font.render("%.1f"%(age/1000000), True, (255,255,255))
+                    # textRect = text.get_rect()
+                    # textRect.center = center
                     color = (255/(k+1), 0, 0)
                     pygame.draw.circle(screen, color, center, radius=15, width=1)
-                    screen.blit(text, textRect)
+                    # screen.blit(text, textRect)
                 
                 # update the display
                 pygame.display.update()

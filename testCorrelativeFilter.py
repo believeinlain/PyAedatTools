@@ -11,26 +11,17 @@ aedat['importParams'] = {}
 
 # Put the filename, including full path, in the 'filePath' field.
 
-# works well
-correlativeFilterArgs = {
-    'dt': 100000,
-    'minCorrelated': 4
-}
-regionFinderArgs = {
-    'regionLifespan': 100000,
-    'SAEThreshold': 50000
-}
 filename = './example_data/Davis346red-2020-06-12T12-31-10-0700-0_Test_7.aedat'
 # kinda works
-correlativeFilterArgs = {
-    'dt': 100000,
-    'minCorrelated': 4
-}
-regionFinderArgs = {
-    'regionLifespan': 100000,
-    'SAEThreshold': 50000
-}
-filename = "C:/Users/steph/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
+# correlativeFilterArgs = {
+#     'dt': 100000,
+#     'minCorrelated': 4
+# }
+# regionFinderArgs = {
+#     'regionLifespan': 100000,
+#     'SAEThreshold': 50000
+# }
+# filename = "C:/Users/steph/OneDrive/Documents/NIWC/NeuroComp/AEDATA_11-12-20/Davis346red-2020-06-12T12-15-01-0700-00000195-0_Test_3_NIWC_Boat_and_SailBoat.aedat"
 # also works pretty decently
 # correlativeFilterArgs = {
 #     'dt': 100000,
@@ -78,5 +69,16 @@ eventPlaybackArgs = {
     'saveFrames': False
 }
 
+correlativeFilterArgs = {
+    'dt': 50000,
+    'n': 4
+}
+SAEArgs = {
+    'noiseFilter': 50000
+}
+regionFinderArgs = {
+    'regionLifespan': 100000
+}
+
 # playback the event data
-SimpleEventPlayback.beginPlayback(eventData, eventPlaybackArgs, correlativeFilterArgs, regionFinderArgs)
+SimpleEventPlayback.beginPlayback(eventData, eventPlaybackArgs, SAEArgs, correlativeFilterArgs, regionFinderArgs)
