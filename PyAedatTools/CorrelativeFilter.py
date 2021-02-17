@@ -14,10 +14,13 @@ class CorrelativeFilter:
         self.buffer = np.zeros((width, height, self.bufferDepth), np.uint32)
         # index of the height above the most recent event for a location
         self.bufferTop = np.zeros((width, height), np.uint8)
+        # keep a reference of the polarity of received events
+        self.polarity = np.zeros((width, height, self.bufferDepth), np.uint8)
 
-    def addEventToBuffer(self, x, y, t):
+    def addEventToBuffer(self, x, y, t, p):
         top = self.bufferTop[x, y]
         self.buffer[x, y, top] = t
+        self.polarity[x, y, top] = p
         top = ( top+1 )%self.bufferDepth
         self.bufferTop[x, y] = top
 
@@ -40,8 +43,8 @@ class CorrelativeFilter:
     def processEvent(self, x, y, t, p):
         # start count at -1 to cancel current event
         count = -1
-        self.addEventToBuffer(x, y, t)
-        localDensity = self.SAE.getLocalDensity(x, y, t, 5, 50000)
+        self.addEventToBuffer(x, y, t, p)
+        # localDensity = self.SAE.getLocalDensity(x, y, t, 5, 50000)
         n = self.n
         dt = self.dt
 

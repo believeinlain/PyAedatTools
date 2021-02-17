@@ -61,8 +61,8 @@ eventData = {
 
 eventPlaybackArgs = {
     'caption': 'Boat detection',
-    'width': 350,
-    'height': 265,
+    'width': 346,
+    'height': 260,
     'playbackSpeed': 1,
     'fadeAlpha': 1,
     'frameStep': 30,
@@ -70,7 +70,7 @@ eventPlaybackArgs = {
 }
 
 correlativeFilterArgs = {
-    'dt': 50000,
+    'dt': 100000,
     'n': 4
 }
 SAEArgs = {

@@ -4,6 +4,9 @@ import sys
 from math import pi
 from math import exp
 
+import numpy as np
+import scipy.io
+
 # for saving screenshots
 from datetime import datetime
 import os
@@ -18,6 +21,9 @@ from PyAedatTools import SurfaceOfActiveEvents
 from PyAedatTools import RegionFinder
 
 import ColorWheel
+
+# frame to capture and save data
+captureFrame = 299
 
 # display event data next to optical flow data
 def beginPlayback(eventData, eventPlaybackArgs, SAEArgs, correlativeFilterArgs, regionFinderArgs):
@@ -154,6 +160,32 @@ def beginPlayback(eventData, eventPlaybackArgs, SAEArgs, correlativeFilterArgs, 
                 # update the display
                 pygame.display.update()
 
+                if numFramesDrawn == captureFrame:
+                    buffer = correlativeFilter.buffer
+                    icap, jcap, kcap = np.indices(buffer.shape)
+                    np.concatenate([icap.reshape(-1, 1), jcap.reshape(-1, 1), kcap.reshape(-1, 1), buffer.reshape(-1, 1)], axis=1)
+                    pbuffer = correlativeFilter.polarity
+                    icap, jcap, kcap = np.indices(pbuffer.shape)
+                    np.concatenate([icap.reshape(-1, 1), jcap.reshape(-1, 1), kcap.reshape(-1, 1), pbuffer.reshape(-1, 1)], axis=1)
+                    SAEBuffer = SAE.tr
+                    icap, jcap = np.indices(SAEBuffer.shape)
+                    np.concatenate([icap.reshape(-1, 1), jcap.reshape(-1, 1), SAEBuffer.reshape(-1, 1)], axis=1)
+                    toHue = lambda index: ColorWheel.getHueByIndex(index)
+                    regionHue = toHue(regionFinder.regionIndex)
+                    for ihue in range(regionHue.shape[0]):
+                        for jhue in range(regionHue.shape[1]):
+                            if regionFinder.regionIndex[ihue,jhue]==-1:
+                                regionHue[ihue,jhue] = -1
+                    icap, jcap = np.indices(regionHue.shape)
+                    np.concatenate([icap.reshape(-1, 1), jcap.reshape(-1, 1), regionHue.reshape(-1, 1)], axis=1)
+
+                    scipy.io.savemat('frames/frame%i.mat'%captureFrame, {
+                        'eventBuffer': buffer,
+                        'polarityBuffer': pbuffer,
+                        'SAE': SAEBuffer,
+                        'regionHue': regionHue
+                        })
+
                 # save the screen as an image
                 if eventPlaybackArgs['saveFrames']:
                     framePath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frames'))
@@ -166,6 +198,10 @@ def beginPlayback(eventData, eventPlaybackArgs, SAEArgs, correlativeFilterArgs, 
 
                 # update events processed
                 sys.stdout.write(" - Event %i" % i)
+                sys.stdout.flush()
+
+                # update frames drawn
+                sys.stdout.write(" - Frame %i" % numFramesDrawn)
                 sys.stdout.flush()
 
                 # increment frames drawn
