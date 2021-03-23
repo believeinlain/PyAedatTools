@@ -24,6 +24,7 @@ import ColorWheel
 
 # frame to capture and save data
 captureFrame = 299
+# captureFrame = 50
 
 # display event data next to optical flow data
 def beginPlayback(eventData, eventPlaybackArgs, SAEArgs, correlativeFilterArgs, regionFinderArgs):

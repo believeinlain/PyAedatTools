@@ -11,10 +11,11 @@ class SurfaceOfActiveEvents:
 
     def processEvent(self, x, y, t):
         # update tr only if t > tl + k
-        if t > self.tl[x, y]+self.k:
-            self.tr[x, y] = t
+        # if t > self.tl[x, y]+self.k:
+        #     self.tr[x, y] = t
         # always update tl
         self.tl[x, y] = t
+        self.tr[x, y] = t # IGNORE NOISE FILTER FOR DEBUG
     
     # return the number of locations with events within range more recent than t-dt
     def getLocalDensity(self, x, y, t, r, dt):

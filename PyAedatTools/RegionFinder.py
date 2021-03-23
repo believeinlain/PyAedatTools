@@ -99,6 +99,9 @@ class RegionFinder:
             assignedRegion = self.createNewRegion(x, y, t)
         # actually add the location to the assigned region
         self.regions[assignedRegion].addLocation(x, y)
+        
+        # assign the index to the location
+        self.regionIndex[x][y] = assignedRegion
 
         return assignedRegion
     
@@ -118,8 +121,6 @@ class RegionFinder:
         index = 0
         while index in self.regions:
             index += 1
-        # assign the index to the location
-        self.regionIndex[x][y] = index
         # create a new region with that index
         self.regions[index] = Region(x, y, t, self, self.regionLifespan)
         # return the index of the new region

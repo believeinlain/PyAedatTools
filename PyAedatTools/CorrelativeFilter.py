@@ -31,12 +31,16 @@ class CorrelativeFilter:
         # start from the current top (self.bufferTop[x, y]) and go backwards
         # until the events are not within dt from t
         # don't count zeros
-        for i in reversed(range(top, top+self.bufferDepth)):
-            b = self.buffer[x, y, i%self.bufferDepth]
-            if b!=0 and b+dt > t:
+        # for i in reversed(range(top, top+self.bufferDepth)):
+        #     b = self.buffer[x, y, i%self.bufferDepth]
+        #     if b!=0 and b+dt >= t:
+        #         count+=1
+        #     else:
+        #         break
+        for i in range(0, self.bufferDepth):
+            b = self.buffer[x, y, i]
+            if b!=0 and b+dt >= t:
                 count+=1
-            else:
-                    break
         
         return count
     
@@ -53,7 +57,10 @@ class CorrelativeFilter:
             if i>=0 and i<self.width:
                 for j in range(y-1, y+2):
                     if j>=0 and j<self.height:
-                        count += self.countBufferHeight(i, j, t, dt)
+                        loc = self.countBufferHeight(i, j, t, dt)
+                        count += loc
+                        # if 300<x<320 and 145<y<165:
+                        #     print(x, y, i, j, loc, count)
                         # if we've reached n we can stop counting
                         if count >= n:
                             return True
